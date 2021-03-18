@@ -16,9 +16,9 @@ Application program에게 system service 제공
 User가 시스템에 대해 알지 못해도 됨   
 Ex) program execution, I/O operation, memory management, file system..
 ### Multiprogramming
-Memory에 여러 개의 process을 올려놓음
+Memory에 여러 개의 process을 올려놓음(I/O operation동안 다른 process 실행)
 ### Multiprocessing
-CPU가 multiprogramming된 processes들을 동시에 처리
+여러 개의 processor가 process를 병렬 처리
 ### Time sharing
 다른 process로 CPU core를 매우 빠르게 교체하여 동시에 처리하는 것처럼 보이게 함
 ### CPU scheduling
@@ -52,7 +52,7 @@ Process에 관한 정보 포함 - process state, program counter(fetch할 memory
 Process가 여러 개의 threads of execution를 가질 수 있게 함
 ### Context switch
 context - PCB에 나타남   
-Interrupt가 발생하면 현재 실행중인 process의 context를 저장하고, 다른 process로 CPU core switch(PCB정보를 CPU register에 load)
+Interrupt가 발생하면 현재 실행중인 process의 context를 저장하고, 다른 process로 CPU core switch(PCB정보를 CPU register(PC)에 load)
 ### Linux process operation
 - fork() system call을 통해 process 생성
 - child process는 parent process의 주소 공간을 복사해서 사용
@@ -92,3 +92,32 @@ Socket = IP:port
 - RPC(Remote Procedure Call)   
 네트워크로 연결된 시스템의 process 간 procedure call 추상화   
 원격지의 함수 호출
+
+---
+## 3. Thread & Concurrency
+### Multithreading
+Thread: light weight process
+CPU가 실행하는 단위가 process -> thread  
+Thread 별로 다른 program counter, register set, stack 정보를 가지고, 같은 code, data, file 정보를 가짐   
+장점   
+- Responsiveness   
+Process가 다 실행되지 못하고 block 됐을 때, thread를 추가하고 실행을 계속할 수 있음
+- Resource sharing   
+Thread는 process의 resource를 공유하므로 통신에 용이
+- Economy   
+Process를 추가하는 것보다 thread를 추가하는게 경제적임(context switching-thread switching)
+- Scalability   
+Multiprocessor architecture를 활용하기 좋음
+### Multicore system
+- single core: time sharing을 통해 concurrent하게 실행
+- multi core: 병렬 처리   
+어떤 task를 나누고 어떻게 나눌 것인지가 중요
+### Multithreading Models
+- user thread: user mode에서 사용하는 thread - kernel support x
+- kernel thread: kernel mode에서 사용하는 thread - 운영체제가 직접 관리
+
+user thread-kernel thread 간 1:1, 1:M, M:N 관계 존재
+### Implicit Threading
+Concurrent & parallel application(multithreading in multicore system)을 개발하는게 쉽지 않음
+-> compiler나 run-time library가 대신 하도록 함   
+Ex) Thread Pool, Fork & Join, OpenMP, GCD
