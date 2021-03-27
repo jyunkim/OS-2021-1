@@ -116,8 +116,104 @@ Multiprocessor architecture를 활용하기 좋음
 - user thread: user mode에서 사용하는 thread - kernel support x
 - kernel thread: kernel mode에서 사용하는 thread - 운영체제가 직접 관리
 
-user thread-kernel thread 간 1:1, 1:M, M:N 관계 존재
+user thread - kernel thread -> 1:1, 1:M, M:N 관계 존재
 ### Implicit Threading
 Concurrent & parallel application(multithreading in multicore system)을 개발하는게 쉽지 않음
 -> compiler나 run-time library가 대신 하도록 함   
 Ex) Thread Pool, Fork & Join, OpenMP, GCD
+
+---
+## 4. CPU Scheduling
+### CPU Scheduling
+목적   
+- CPU utilization 향상
+- Throughput 향상   
+단위 시간 동안 완료한 process 수
+- Turnaround time 최소화   
+process 도착 ~ 완료 시간
+- Waiting time 최소화   
+process가 ready queue에서 대기하는 시간의 합
+- Response time 최소화     
+사용자 응답 시간
+
+용도   
+context switching을 통해 여러 개의 process를 concurrent하게 처리
+- CPU burst time: CPU 사용 시간 -> running 상태
+- I/O burst time: I/O 대기 시간 -> waiting, ready 상태   
+=> 일반적으로 I/O burst time이 더 많음
+- CPU-bound: CPU burst time이 많은 process
+- I/O-bound: I/O burst time이 많은 process
+
+CPU Scheduler가 memory에 있는 ready 상태의 process 중 CPU를 할당할 process 선택   
+**How?**
+- Preemptive(선점형)   
+scheduler가 process를 교체할 수 있음
+- Non-preemptive(비선점형)   
+process가 스스로 끝날 때까지 유지
+
+**When?**
+1. running -> waiting
+2. running -> ready
+3. waiting -> ready
+4. terminate   
+
+1, 4 -> 항상 non-preemptive
+
+### Dispatcher
+CPU core의 소유권을 넘겨주는(context switching) 모듈   
+=> process 선택은 scheduler, 교체는 dispatcher
+user mode switching, user program을 resume하기 위한 적절한 위치로의 jump 기능
+dispatcher latency: process를 교체하는데 드는 시간
+
+## Scheduling Algorithms
+Ready queue에 있는 process 중 어떤 process에 CPU core를 할당할 것인지 결정
+### FCFS(First Come First Served)
+먼저 온 것 먼저 실행(non-preemptive)   
+queue를 이용하여 CPU에 먼저 요청한 process에 먼저 할당   
+CPU-burst time에 따라 waiting time이 크게 달라져 잘 사용하지 않음
+### SJF(Shortest Job First)
+가장 짧은 job 먼저 실행   
+CPU-burst time이 같으면 FCFS로 결정   
+waiting time을 최소화하기 때문에 optimal 일 수 있음   
+But, 다음 CPU burst time을 알 방법이 없음   
+-> 해당 process의 이전 CPU burst time을 통해 예측   
+preemptive, non-preemptive 둘 다 가능   
+Ex) 10만큼 소요되는 process(p1)가 5만큼 실행됐을 때 1만큼 소요되는 process(p2)가 새로 도착   
+p1 마저 실행 -> non-preemptive   
+중단하고 p2 먼저 실행 -> preemptive
+### SRTF(Shortest Remaining Time First)
+Preemptive SJF scheduling   
+남은 시간이 가장 짧은 것 먼저 실행   
+현재 실행 중인 process의 남은 시간보다 burst time이 적은 process가 도착하면 새로운 process로 선점   
+SJF보다 waiting time 단축
+### RR(Round-Robin)
+preemptive FCFS with time quantum(작은 단위 시간)   
+-> time quantum만큼 실행되면 interrupt를 일으켜 process 변경(context switch)   
+circular queue를 이용한 time sharing 방식   
+-> 덜 끝난 process는 ready queue의 tail로 보내짐   
+적절한 time quantum을 잡는 것이 중요   
+average waiting time은 SJF보다 약간 더 길다
+### Priority-based
+time sharing 방식에서 우선순위 부여   
+우선순위가 같으면 FCFS로 결정   
+SJF - 우선순위가 CPU burst의 역   
+우선순위가 작은 process는 영원히 실행되지 못하는 경우 발생(starvation)   
+-> 오랫동안 waiting하고 있는 process의 우선순위를 점진적으로 높여줌   
+**RR + Priority scheduling**   
+우선순위가 높은 process를 먼저 실행하되, 우선순위가 같을 경우 RR로 결정
+### MLQ(Multi Level Queue)
+ready queue를 분리하여 각각에 우선순위 부여   
+우선순위가 높은 ready queue의 process들을 모두 실행하면 다음 우선순위의 ready queue의 process들 실행   
+real-time process -> system process -> interactive process(UI) -> batch process   
+### MLFQ(Multi Level Feedback Queue)
+우선순위가 높은 ready queue는 quantum을 짧게 주고, 우선순위가 작을수록 quantum을 많이줌   
+
+### Thread Scheduling
+현대 OS에서는 process scheduling을 하지 않고 thread scheduling함(kernel thread)   
+user thread는 thread library가 관리
+### Real-Time CPU Scheduling
+Real-Time(실시간) OS에서의 scheduling   
+- Soft Realtime   
+real-time process가 반드시 deadline내에 실행되어야 하지는 않지만, 우선순위는 존재
+- Hard Realtime   
+task가 반드시 deadline내에 실행되어야 함
