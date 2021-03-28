@@ -218,6 +218,7 @@ real-time process가 반드시 deadline내에 실행되어야 하지는 않지�
 - Hard Realtime   
 task가 반드시 deadline내에 실행되어야 함
 
+---
 ## 5. Process Synchronization
 Cooperating process들이 공유 데이터에 동시에 접근할 때 data inconsistency 발생 가능   
 -> 순서 보장 필요   
