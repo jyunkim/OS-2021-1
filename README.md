@@ -217,3 +217,109 @@ Real-Time(실시간) OS에서의 scheduling
 real-time process가 반드시 deadline내에 실행되어야 하지는 않지만, 우선순위는 존재
 - Hard Realtime   
 task가 반드시 deadline내에 실행되어야 함
+
+## 5. Process Synchronization
+Cooperating process들이 공유 데이터에 동시에 접근할 때 data inconsistency 발생 가능   
+-> 순서 보장 필요   
+- concurrent execution   
+interrupt에 의해 context switch가 일어나 다른 process에 CPU core 할당
+- parallel execution
+분리된 CPU core에 의해 여러 process가 실행됨   
+
+Ex) producer-consumer problem   
+두개의 process가 buffer를 이용하여 asynchronously(동작을 맞추지 않음)하게 실행되며 데이터 공유
+
+count++, count--
+![Alt text](Synchronization1.PNG)
+![Alt text](Synchronization2.PNG)
+count에 5가 저장되어야 하지만 경우에 따라 4, 5, 6이 저장됨
+
+### Race Condition(경쟁 상황)
+여러 processes(threads) 간 공유 데이터로의 접근 순서에 따라 실행 결과가 달라지는 상황   
+이를 방지하기 위해서 process(thread) synchronization이 필요
+
+### Critical Section Problem(임계 영역 문제)
+각 process의 코드 영역 중 공유 데이터에 접근하는 코드 영역(code segment)    
+코드 영역은 크게 4가지로 나뉨
+- entry section: critical section에 진입하기 위한 허가 요청 영역
+- critical section
+- exit section: critical section에서 나오는 영역
+- remainder section
+
+### Mutual Exclusion(상호 배제)
+한 process가 critical section을 실행하고 있으면, 다른 process들은 critical section을 실행할 수 없음   
+-> race condition 방지(Synchronization)
+
+### Progress
+deadlock 방지   
+critical section을 실행하고 있는 process가 없으면, critical section에 진입할 다음 process를 선택하는 것이 지연돼서는 안됨
+
+### Bounded Waiting
+starvation 방지   
+critical section에 진입할 수 있는 시간을 한정하여 다른 process들의 critical section이 영원히 실행되지 못하는 것 방지
+
+## SW Solutions
+### Peterson Algorithm
+아키텍처에 따라 제대로 동작하지 않을 수 있음   
+mutual exclusion, progress, bounded waiting 증명 가능
+
+![Alt text](peterson.PNG)
+
+## HW Solutions
+Critical-section problem 해결을 위해 hardware instruction 제공
+### Atomic Operation
+더이상 나눌 수 없는 operation 단위(1clock에 실행)   
+Atomic instruction을 만들어 문제 해결   
+-> interrupt 불가 -> mutual exclusion 보장   
+Ex) test_and_set(), compare_and_swap()
+이를 이용하여 atomic variable 생성
+
+## OS Solution
+### Spinlock
+P(), V()라는 atomic operation으로만 접근 가능한 정수형 변수   
+-> OS가 전체 operation이 한 instruction cycle에 수행되도록 보장
+
+![Alt text](spinlock.PNG)
+Spinlock(S)가 1이면 critical section을 실행 중인 process가 있고, 0이면 없다는 의미   
+-> mutual exclusion 보장
+
+But, multi processor 시스템에서만 사용 가능(parallel execution)
+
+## Language-Level Solution
+SW, HW, OS Solution -> Low-level mechanism => 사용하기 어려움, error 발생 확률 높음
+Language-Level Solution -> High-level Mechanism => 프로그래밍 언어 단에서 해결
+### Monitor
+최대 하나의 process만 접근할 수 있는 공유 데이터와 critical section의 집합   
+구조
+- entry queue: 모니터 내 함수 수만큼 존재
+- condition queue: 특정 이벤트를 기다리는 process가 대기
+- signaler queue: 신호 제공을 위한(signal 명령을 실행한) process가 임시 대기
+
+특징
+- mutual exclusion: 모니터 내에는 하나의 process만 진입 가능
+- information hiding: 공유 데이터는 모니터 내의 process만 접근 가능
+
+모니터 내에 자원을 요청하는 function, 자원을 반납하는 function 존재   
+자원을 할당 받을 수 있을 때를 기다리는 condition queue에 signaler queue에서 신호 제공
+
+![Alt text](monitor.PNG)
+
+과정
+1. 처음 도착한 process(p1)가 자원 요청
+2. 자원이 p1에 할당되고 p1이 모니터에서 나감
+3. p2, p3가 요청을 위한 entry queue에 도착
+4. p2가 모니터에 들어와 자원 요청
+5. 하지만 모니터에 자원이 없으므로 condition queue로 이동
+6. p1이 자원 사용을 끝내고 반납을 위한 entry queue에 도착
+7. p1이 모니터에 들어와 자원 반납
+8. p1이 signaler queue로 이동 후 condition queue에 신호 전달
+9. p2가 모니터에 들어와 자원 할당 받은 후 나감
+10. p1이 다시 모니터에 들어와 남은 일을 수행하고 나감
+
+장점
+- 사용이 쉬움
+- error 발생 가능성 낮음(ex.deadlock)
+
+단점
+- 지원하는 언어에서만 사용 가능
+- 컴파일러가 OS를 이해해야 함
