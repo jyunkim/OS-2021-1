@@ -58,6 +58,8 @@ Interrupt가 발생하면 현재 실행중인 process의 context를 저장하고
 - child process는 parent process의 주소 공간을 복사해서 사용
 - fork()의 return code가 0이면 child process
 - child의 nonzero pid가 parent process로 return됨
+
+## Process간 통신
 ### IPC(Inter-Process Communication)
 동시에 실행되는 process에는 서로 데이터를 공유하지 않는 independent process와 서로 데이터를 공유하는 cooperating process가 존재   
 데이터를 교환하기 위해선 IPC mechanism이 요구됨   
