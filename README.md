@@ -2,8 +2,10 @@
 ## 1. What is operating system?
 ### Computer
 정보를 처리하는 기계
+
 ### A stored-program computer(von Neumann architecture)
 메모리에 program(set of instructions)을 저장하고 CPU에서 순차적으로 처리(fetch-execute)
+
 ### OS
 컴퓨터 시스템을 운영하는 소프트웨어   
 컴퓨터에서 항상 실행되고 있는 프로그램   
@@ -15,14 +17,19 @@ OS kernel이 기능의 핵심
 Application program에게 system service 제공   
 User가 시스템에 대해 알지 못해도 됨   
 Ex) program execution, I/O operation, memory management, file system..
+
 ### Multiprogramming
 Memory에 여러 개의 process을 올려놓음(I/O operation동안 다른 process 실행)
+
 ### Multiprocessing
 여러 개의 processor가 process를 병렬 처리
+
 ### Time sharing
 다른 process로 CPU core를 매우 빠르게 교체하여 동시에 처리하는 것처럼 보이게 함
+
 ### CPU scheduling
 CPU가 준비 상태에 있는 process 중 어떤 것을 실행시킬지 선택
+
 ### Dual mode operation
 user mode & kernel mode   
 Kernel mode에서만 하드웨어를 직접적으로 제어할 수 있게 함으로써 프로그램의 잘못된 동작 방지   
@@ -32,6 +39,7 @@ Kernel mode에서만 하드웨어를 직접적으로 제어할 수 있게 함으
 ### Process
 실행 중인 프로그램   
 HDD에 있는 프로그램이 메모리에 load된 상태
+
 ### Memory 영역
 - text: 실행 가능한 코드   
 - data: 전역 변수   
@@ -39,20 +47,25 @@ HDD에 있는 프로그램이 메모리에 load된 상태
   - uninitialized data
 - heap: 동적 할당   
 - stack: 함수 관련(parameter, return address, local variables)   
+
 ### Process states
 - new: 생성된 상태(fork)
 - ready: CPU에 할당될 준비가 완료된 상태
 - running: 실행 중인 상태(CPU 점유), time interrupt 시 ready 상태로
 - waiting: 아직 끝나지 않고 다른 일이 끝날 때 까지 기다리는 상태(ex. I/O completion)
 - terminated: 실행 종료된 상태
+
 ### PCB(Process Control Block)
 일종의 구조체  
 Process에 관한 정보 포함 - process state, program counter(fetch할 memory 주소), CPU, memory..
+
 ### Multithreading
 Process가 여러 개의 threads of execution를 가질 수 있게 함
+
 ### Context switch
 context - PCB에 나타남   
 Interrupt가 발생하면 현재 실행중인 process의 context를 저장하고, 다른 process로 CPU core switch(PCB정보를 CPU register(PC)에 load)
+
 ### Linux process operation
 - fork() system call을 통해 process 생성
 - child process는 parent process의 주소 공간을 복사해서 사용
@@ -64,10 +77,12 @@ Interrupt가 발생하면 현재 실행중인 process의 context를 저장하고
 동시에 실행되는 process에는 서로 데이터를 공유하지 않는 independent process와 서로 데이터를 공유하는 cooperating process가 존재   
 데이터를 교환하기 위해선 IPC mechanism이 요구됨   
 shared memory, message passing 두가지 모델이 존재
+
 ### Shared memory system
 Producer-Consumer problem(producer는 정보 제공, consumer는 정보 소비)에서 producer는 buffer를 채우고, consumer는 buffer를 비우면서 하나의 buffer를 공유 -> 동시에 실행   
 메모리 영역에 접근하는 코드를 application programmer가 작성해야함   
 Ex) POSIX
+
 ### Message Passing
 운영체제가 shared memory 관리(system call) - send(), receive()  
 메세지를 주고 받는 communication link 필요
@@ -84,6 +99,7 @@ port에 메세지를 넣고, 가져가는 방식
 메세지를 다 보내지 못하거나 받지 못해도 process 그대로 진행   
 정상적으로 전송됐는지, 받았는지 확인할 수 없지만 더 빠름   
 Ex) Pipes
+
 ### Communication in Client-Server systems
 서로 다른 PC의 process 간 통신   
 (IPC - 하나의 PC 내의 process 간 통신)
@@ -110,15 +126,18 @@ Thread는 process의 resource를 공유하므로 통신에 용이
 Process를 추가하는 것보다 thread를 추가하는게 경제적임(context switching-thread switching)
 - Scalability   
 Multiprocessor architecture를 활용하기 좋음
+
 ### Multicore system
 - single core: time sharing을 통해 concurrent하게 실행
 - multi core: 병렬 처리   
 어떤 task를 나누고 어떻게 나눌 것인지가 중요
+
 ### Multithreading Models
 - user thread: user mode에서 사용하는 thread - kernel support x
 - kernel thread: kernel mode에서 사용하는 thread - 운영체제가 직접 관리
 
 user thread - kernel thread -> 1:1, 1:M, M:N 관계 존재
+
 ### Implicit Threading
 Concurrent & parallel application(multithreading in multicore system)을 개발하는게 쉽지 않음
 -> compiler나 run-time library가 대신 하도록 함   
@@ -173,6 +192,7 @@ Ready queue에 있는 process 중 어떤 process에 CPU core를 할당할 것인
 먼저 온 것 먼저 실행(non-preemptive)   
 queue를 이용하여 CPU에 먼저 요청한 process에 먼저 할당   
 CPU-burst time에 따라 waiting time이 크게 달라져 잘 사용하지 않음
+
 ### SJF(Shortest Job First)
 가장 짧은 job 먼저 실행   
 CPU-burst time이 같으면 FCFS로 결정   
@@ -183,11 +203,13 @@ preemptive, non-preemptive 둘 다 가능
 Ex) 10만큼 소요되는 process(p1)가 5만큼 실행됐을 때 1만큼 소요되는 process(p2)가 새로 도착   
 p1 마저 실행 -> non-preemptive   
 중단하고 p2 먼저 실행 -> preemptive
+
 ### SRTF(Shortest Remaining Time First)
 Preemptive SJF scheduling   
 남은 시간이 가장 짧은 것 먼저 실행   
 현재 실행 중인 process의 남은 시간보다 burst time이 적은 process가 도착하면 새로운 process로 선점   
 SJF보다 waiting time 단축
+
 ### RR(Round-Robin)
 preemptive FCFS with time quantum(작은 단위 시간)   
 -> time quantum만큼 실행되면 interrupt를 일으켜 process 변경(context switch)   
@@ -195,6 +217,7 @@ circular queue를 이용한 time sharing 방식
 -> 덜 끝난 process는 ready queue의 tail로 보내짐   
 적절한 time quantum을 잡는 것이 중요   
 average waiting time은 SJF보다 약간 더 길다
+
 ### Priority-based
 time sharing 방식에서 우선순위 부여   
 우선순위가 같으면 FCFS로 결정   
@@ -203,16 +226,19 @@ SJF - 우선순위가 CPU burst의 역
 -> 오랫동안 waiting하고 있는 process의 우선순위를 점진적으로 높여줌   
 **RR + Priority scheduling**   
 우선순위가 높은 process를 먼저 실행하되, 우선순위가 같을 경우 RR로 결정
+
 ### MLQ(Multi Level Queue)
 ready queue를 분리하여 각각에 우선순위 부여   
 우선순위가 높은 ready queue의 process들을 모두 실행하면 다음 우선순위의 ready queue의 process들 실행   
 real-time process -> system process -> interactive process(UI) -> batch process   
+
 ### MLFQ(Multi Level Feedback Queue)
 우선순위가 높은 ready queue는 quantum을 짧게 주고, 우선순위가 작을수록 quantum을 많이줌   
 
 ### Thread Scheduling
 현대 OS에서는 process scheduling을 하지 않고 thread scheduling함(kernel thread)   
 user thread는 thread library가 관리
+
 ### Real-Time CPU Scheduling
 Real-Time(실시간) OS에서의 scheduling   
 - Soft Realtime   
@@ -326,3 +352,61 @@ Language-Level Solution -> High-level Mechanism => 프로그래밍 언어 단에
 단점
 - 지원하는 언어에서만 사용 가능
 - 컴파일러가 OS를 이해해야 함
+
+---
+## 6. Deadlock
+### 정의
+Process들이 서로가 가진 자원을 기다리며 block된 상태   
+각자 일부 자원을 가지고 있는 상태에서 상대방의 자원을 요구할 때 발생   
+
+### Resource
+하드웨어, 소프트웨어를 포함하는 개념   
+Ex) I/O device, CPU cycle, memory space   
+**Process의 자원 사용 절차**   
+Request -> Allocate -> Use -> Release   
+
+### 발생 조건
+- Mutual exclusion(상호배제)   
+매 순간 하나의 process만이 자원 사용 가능
+- Non-preemption(비선점)   
+process의 자원을 강제로 빼앗지 못함
+- Hold and wait(보유대기)   
+자원을 가진 process가 추가 자원을 얻기 위해 자원을 계속 가지고 있음   
+- Circular wait(순환대기)   
+process 서로의 자원을 기다리는 사이클이 형성됨
+
+### Resource-Allocation Graph(자원 할당 그래프)
+Deadlock 확인 방법  
+P: process   
+R: resource   
+P -> R: request edge   
+R -> P: assignment edge
+
+![Alt text](deadlock.PNG)   
+1 -> deadlock   
+2 -> deadlock x
+- 그래프에 cycle(화살표를 따라 시작으로 돌아옴)이 없으면 deadlock이 아님
+- 그래프에 cycle이 있고, cycle에 포함된 resource에 하나의 instance만 있으면 deadlock
+
+### 처리 방법
+방지   
+- Deadlock Prevention   
+자원 할당 시 deadlock의 4가지 필요 조건 중 하나를 차단   
+But 여러 제약 조건으로 자원 이용률(utilization), 성능(throughput) 저하
+- Deadlock Avoidance   
+Deadlock의 가능성이 없는 경우에만 자원 할당   
+Process가 시작될 때 해당 process가 평생 쓸 자원의 양을 파악하여 deadlock 가능성 파악 후 자원 할당 결정   
+-> process가 추가로 필요한 최대(평생 쓸) 자원의 양이 가용 자원보다 많으면 할당하지 않고, 자원 반납을 통해 가용 자원이 추가되면 다시 확인   
+=> 최악의 상황을 고려   
+Ex) Banker's Algorithm
+![Alt text](banker.PNG)
+
+처리   
+- Deadlock Detection and Recovery   
+Deadlock 발생은 허용하되 발견 시 recover   
+Banker's Algorithm을 낙관적으로 사용하여 detection   
+=> 최선의 상황을 고려    
+Deadlock에 연루된 process들을 모두 종료시키거나, 하나씩 자원을 빼앗아서 recover
+- Deadlock Ignorance   
+Deadlock을 시스템이 책임지지 않음   
+Deadlock은 빈번히 발생하는 것이 아니기 떄문에 미연에 방지하기 위해 조치를 취하는 것이 더 많은 overhead 발생시킴 -> 대부분 이 방식 사용
