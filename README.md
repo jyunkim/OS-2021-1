@@ -410,3 +410,85 @@ Deadlock에 연루된 process들을 모두 종료시키거나, 하나씩 자원�
 - Deadlock Ignorance   
 Deadlock을 시스템이 책임지지 않음   
 Deadlock은 빈번히 발생하는 것이 아니기 떄문에 미연에 방지하기 위해 조치를 취하는 것이 더 많은 overhead 발생시킴 -> 대부분 이 방식 사용
+
+## 7. Memory Management
+### Main Memory
+주소를 가지는 byte 단위의 array로 구성됨   
+CPU는 program counter를 이용하여 memory에서 instruction fetch   
+base register와 limit register를 이용하여 접근 주소 범위 결정
+
+### Address binding
+Program은 binary file로 디스크에 저장되어 있음   
+Program을 실행시키기 위해선 memory로 가져와야됨 -> process   
+
+![Alt text](memory.PNG)
+
+Logical address: CPU에서 사용하는 user program의 주소   
+Physical address: memory의 주소   
+
+**MMU(Memory Management Unit)**   
+logical address를 physical address로 매핑하는 하드웨어
+![Alt text](mmu.PNG)
+
+### Dynamic Loading
+전체 program을 memory에 저장하는게 아니라 호출될 때만 load   
+-> memory 공간 utilization 향상
+
+### DLL(Dynamically Linked Libraries)
+User program이 실행될 때 link되는 system library   
+Main memory에 하나의 DLL instance만 존재 -> 여러 user process끼리 공유
+
+## Memory Allocation
+### Contiguous Memory Allocation
+Process를 통채로 memory에 할당   
+다른 process가 할당된 영역과 연속적으로 존재
+
+### Variable-Partition scheme
+가장 간단한 contiguous memory allocation 방식   
+Process마다 다른 크기의 memory partition 할당   
+각 partition에는 하나의 process만 존재하기 때문에 process가 바뀌면서 hole 발생   
+해결 방법   
+- First-Fit: 크기가 충분한 첫번째 hole에 할당
+- Best-Fit: 크기가 충분하고 가장 작은 hole에 할당
+- Worst-Fit 가장 큰 hole에 할당
+
+**Fragmentation**
+- External fragmentation   
+Memory가 작은 크기의 여러 hole로 쪼개져, 전체 남은 공간은 많지만 연속적인 공간이 부족하여 할당할 수 없는 문제
+- Internal fragmentation   
+Process 크기가 애매하여 partition내의 사용되지 않는 memory 발생 문제
+
+### Paging
+Process의 physical address space가 non-contiguous함   
+Physical memory를 고정된 크기의 block(frames), logical memory를 같은 크기의 black(pages)로 쪼갬   
+Logical address = page number + page offset   
+Page table을 통해 page number로부터 frame number를 찾음
+![Alt text](paging.PNG)
+
+### PTBR(page-table base register)
+Page table은 memory에 두고, CPU의 PTBR을 이용하여 page table을 가리킴   
+Context switching을 빠르지만, memory 접근 속도가 느림
+
+### TLB(Translation Look-aside Buffer)
+Cache memory 하드웨어를 통해 접근   
+Page number가 TLB에 있으면 TLB hit, 없으면 TLB miss   
+Hit ratio: TLB hit 비율
+
+### Memory Protection
+Valid-invalid bit   
+page table의 각 entry에 포함   
+연관된 page가 process의 logical address space에 있는지 확인
+
+### Page table structure
+Logical address space가 점차 커짐에 따라 page table도 커져야됨
+- Hierarchical Paging   
+Logical address space를 여러 table로 쪼갬
+- Hashed Page Table   
+Hash table을 이용하여 virtual page number 관리
+- Inverted Page Table   
+Logical address에 pid 추가
+
+### Swapping
+Backing store를 이용하여 process를 memory에서 꺼냈다 넣었다 함(swap)   
+Process들의 전체 physical address space가 실제 physical memory를 초과할 수 있게 함   
+오늘날에는 Swapping + paging 합쳐서 사용
