@@ -382,7 +382,7 @@ R: resource
 P -> R: request edge   
 R -> P: assignment edge
 
-![Alt text](deadlock.PNG)
+![Alt text](deadlock.png)
 
 1 -> deadlock   
 2 -> deadlock x
