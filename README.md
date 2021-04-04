@@ -382,7 +382,7 @@ R: resource
 P -> R: request edge   
 R -> P: assignment edge
 
-![Alt text](deadlock.PNG)   
+![Alt text](deadlock.PNG)
 1 -> deadlock   
 2 -> deadlock x
 - 그래프에 cycle(화살표를 따라 시작으로 돌아옴)이 없으면 deadlock이 아님
