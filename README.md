@@ -493,3 +493,117 @@ Logical address에 pid 추가
 Backing store를 이용하여 process를 memory에서 꺼냈다 넣었다 함(swap)   
 Process들의 전체 physical address space가 실제 physical memory를 초과할 수 있게 함   
 오늘날에는 Swapping + paging 합쳐서 사용
+
+## 8. Virtual Memory
+메모리에 완전히 올라가지 않은 process를 실행할 수 있게 하는 기술   
+-> program이 physical memory보다 커도 됨
+
+![](virtual.PNG)
+
+virtual memory와 physical memory를 매핑하고, 실제 memory에 loading되지 않는 page들은 backing store(ex.HDD)에 저장   
+**Page sharing을** 통해 file과 memory 공유가 쉬워짐
+
+### Demand Paging
+Page를 요청할 때만 memory에 올림   
+Memory에 page가 없어도 process 실행 가능   
+Process가 실행 중일 때는 memory에 있거나 secondary storage에 존재   
+이를 구분하기 위해서 valid-invalid bit scheme 사용
+- valid: page가 legal하고 memory에 존재
+- invalid: page가 valid하지 않거나 secondary storage에 존재
+
+### Page Fault
+메모리에 loading이 안된 page에 접근했을 때 발생   
+**Handling Procedure**   
+1. Valid인지 invalid인지 구분하기 위해 internal table 체크
+2. valid -> terminate, valid이지만 page fault -> page in
+3. memory의 빈 영역인 free frame 찾음
+4. secondary storage에서 desired page를 읽어서 새로운 frame에 할당
+5. Page가 valid하다는 것을 나타내기 위해 internal table과 page table 수정
+6. Restart instruction
+
+![](dp.PNG)
+
+### Locality of Reference(참조 국부성)
+Program이 각 instruction마다 몇개의 새로운 page에 접근 -> instruction마다 multiple page faults 발생 가능   
+But 실제로 잘 발생하지 않고, program은 참조 국부성을 가지려 하기 때문에 demand paging을 통해 좋은 performance를 가져옴   
+Ex) Code와 data는 균일하게 access되지 않고 주로 특정 부분만 access됨   
+-> demand paging을 통해 page fault를 줄이고 system performance를 향상시킬 수 있음   
+
+### Hardware support
+- page table   
+vaild 또는 invalid 마킹
+- secondary memory(swap space)   
+memory에 존재하지 않는 page를 가지고 있음   
+Ex) SSD, HDD
+
+### Instruction Restart
+Page fault 이후 process의 같은 공간, 상태에서 instruction 재실행   
+Page fault가 instruction fetch 단계에서 발생하면 다시 fetch
+
+### Free Frame List
+Page fault가 발생했을 때, desired page를 secondary storage에서 memory로 가져오려면 free frame을 알아야 함   
+Linked list로 구성된 free frame list 이용
+
+### Demand Paging Performance
+**Effective access time**
+![](performance.PNG)
+대부분 read하는데 시간 소비
+
+## Page Replacement
+Free frame이 없을 경우, 현재 사용하지 않는 frame 하나를 비움(secondary storage로)   
+해당 content를 swap space에 write하고 해당 page를 invalid로 page table 수정
+![](pr.PNG)
+
+Algorithm - page fault 수를 최소화하는 것이 중요
+
+### FIFO Page replacement
+가장 오래된 page를 먼저 교체   
+**Belady's Anomaly**   
+일반적으로 frame이 많을수록 page fault는 줄어들지만, 어느 지점에서 page fault가 늘어나는 현상
+![](ba.PNG)
+
+### Optimal Page replacement(OPT)
+가장 오랜 기간 사용되지 않을 것 같은 page 교체   
+가장 적은 page fault rate 보장   
+Belady's anomaly를 겪지 않음   
+But 예측이 필요하므로 다른 알고리즘과의 비교에 주로 사용됨
+
+### LRU Page Replacement
+**Least Recently Used**   
+Page가 마지막으로 사용된 시간을 기록해놓고, 사용되지 않은 기간이 가장 긴 page 교체   
+이를 위해 하드웨어 지원 필요 -> counter, stack
+- Counter implementation   
+Page가 참조될 때마다 counter 복사   
+가장 작은 값을 가지는 page 교체
+- Stack implementation   
+Stack에 page number 저장   
+중간에서 pop 가능   
+Bottom에 있는 page 교체   
+- Reference bit   
+0으로 초기화된 상태에서 참조되면 1로 변경   
+reference bit이 0인 것 교체
+
+### Second-Chance Algorithm
+FIFO 기반   
+하지만 reference bit이 1이면 한번 더 기회를 주고 다음 FIFO page 선택
+
+### Frame Allocation
+- Equal   
+모든 process에게 동일한 frame 공유
+- Proprotional   
+Process의 크기에 따라 다르게 할당
+
+- Local   
+자신에게 할당된 frame 중에서 선택
+- Global   
+System의 모든 frame 중에서 선택
+
+### Thrashing
+Process가 충분한 page를 가지지 않으면 page fault rate이 매우 높아짐   
+빈번한 page in and out으로 인해 CPU utilization이 급격히 떨어지는 현상
+![](thrashing.PNG)
+
+**Working-Set Model**   
+만약 page가 active하면 working set에 존재   
+만약 더이상 사용되지 않으면 working set에서 제외   
+Working set에 있는 것만 load => Thrashing 완화
