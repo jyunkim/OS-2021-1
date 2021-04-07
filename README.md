@@ -607,3 +607,155 @@ Process가 충분한 page를 가지지 않으면 page fault rate이 매우 높�
 만약 page가 active하면 working set에 존재   
 만약 더이상 사용되지 않으면 working set에서 제외   
 Working set에 있는 것만 load => Thrashing 완화
+
+## 9. Storage Management
+### Mass-Storage
+비휘발성 메모리, secondary storage system   
+Ex) HDD, NVM   
+magnetic tapes, optical disks, cloud storage => RAID system
+![](hdd.PNG)
+
+### HDD Scheduling
+**목표**   
+access time(seek time) 최소화   
+데이터 전송 bandwidth 최대화   
+
+\* seek time   
+device arm이 cylinder의 특정 sector를 찾아가는 데에 걸리는 시간   
+\* disk bandwidth   
+한번에 전송될 수 있는 bytes / 시간
+
+### FIFO
+
+### SCAN
+disk arm이 디스크의 한 쪽 끝에서 시작하여 다른 쪽 끝으로 이동   
+
+### C-SCAN
+SCAN과 같지만 다른 쪽 끝에 가면 돌아올 때 요청을 수행하지 않고 시작점으로 바로 돌아옴   
+cylinder를 circular list처럼 다룸
+
+### Boot Block
+전원이 연결되었을 때 컴퓨터를 구동시킴   
+가장 먼저 실행되는 program인 bootstrap loader가 NVM flash memory(ROM)에 저장되어 있음
+
+### RAID
+Redundant Arrays of Independent Disks   
+Disk-organization 기술 집합   
+병렬 처리(striping)를 통해 data가 읽고 쓰여지는 비율 향상   
+Redundant 정보가 mutiple device에 저장될 수 있기 때문에(mirroring) data storage의 reliability 향상 -> 정보 손실 방지
+
+\* Parallelism   
+multiple drives => transfer rate 향상
+
+## I/O System
+컴퓨터의 두 가지 주요 기능: I/O(UI), computing(CPU)   
+OS는 I/O operation, I/O device를 관리
+
+### Memory-Mapped I/O
+Control register들이 processor의 주소 공간으로 매핑됨   
+CPU는 표준 데이터 전송 instruction을 이용하여 physical memory에 매핑된 위치에 있는 device-control register 읽고 씀
+
+### I/O types
+- polling(busy waiting)   
+status register를 busy bit이 clear될 때까지 반복하여 읽음
+- interrupt   
+CPU가 interrupt-request line이라는 wire를 가지고 있어 interrupt를 발견하면 ISR로 jump하여 interrupt 처리
+- DMA(Direct Memory Access)   
+programmed I/O를 사용하지 않음   
+대용량 데이터 전송에 주로 사용
+
+### Blocking vs Non-Blocking
+- Blocking I/O   
+Thread가 중단됨(running -> waiting)
+- Non-Blocking I/O   
+Thread를 중지시키지 않고 그대로 return
+- Asynchronous system call   
+Thread가 계속 실행됨
+
+## File System
+Data와 program에 접근하기 위한 online(logical) storage   
+File, directory로 구성
+
+### Access Method
+- sequential access   
+- direct access(random)
+![](filesys.PNG)
+
+### Allocation Method
+File에 공간을 어떻게 할당할 것인지   
+- Contiguous Allocation   
+각 file을 통째로 할당   
+external fragmentation 발생
+- Linked Allocation   
+각 file을 storage block의 linked list로 연결   
+Sequential-access file에만 효과적
+- FAT(File Allocation Table)   
+Table에 linked list의 index 저장
+- Indexed Allocation   
+Block의 pointer들을 index block에 저장
+
+## 10. Security and Protection
+### Security
+정보의 integrity를 보호하기 위해 사용자 인증 보장
+unauthorized access, malicious destruction, accidental introduction 등 으로부터 computer resource 보호
+
+### Security Violation
+- threat - accidental
+- attack - intentional(malicious)
+
+**Type**
+- confidentiality
+- integrity
+- availability
+- Theft of service
+- Denial of service(Dos)
+
+### Security Level
+- physical
+- network
+- operating system
+- application
+![](security.PNG)
+
+### Program Threat
+- Malware   
+Code injection으로 computer system에 공격을 주는 소프트웨어   
+Ex) Trojan horse, spyware, ransomware
+- Viruses and Worms   
+다른 program을 감염시키거나 network을 이용하여 퍼짐
+
+### System and Network Threat
+- sniffing   
+숨어서 network traffic을 가로챔
+- spoofing   
+집단에 속해있는 것처럼 속이거나, 두 peer간 transaction을 가로챔
+- Denial of Service   
+정보를 훔치는 것을 목표로 하지 않고, 사용자들의 system 사용을 괴롭힘
+- Port Scanning   
+원래 공격 용도는 아니지만 취약점을 찾아내 악용될 수 있음
+
+### Cryptography(암호화)
+암호화를 통해 OS가 두 peer가 주고 받는 network message를 검증할 필요가 없게 함   
+Key를 이용하여 암호화, 복호화 과정을 거침
+
+**Encryption**   
+Key를 가지고 있는 receiver만이 message를 읽을 수 있음 => ciphertext를 plaintext로 decrypt 가능
+- symmetric: 암호화, 복호화에 같은 key 사용
+- asymmetric: 암호화, 복호화에 다른 key 사용 -> public key, private key
+
+### Authentication
+Encryption이 receiver를 제한하는 것이라면, authentication은 sender를 제한   
+Hash function을 사용하여 고정된 크기로 암호화하고 verificate(복호화x)   
+전자 서명에 많이 사용
+
+## Protection
+OS로부터 권한을 부여받은 process만 resource를 사용하게 함   
+사용자에게 system 접근에 대한 허가 제한
+
+### Least Privileage
+Process, user에게 최소한의 권한 부여(permission)
+
+### Protection Method
+- Access matrix: access control list에 접근 권한 포함
+- Sandboxing: running process에서 할 수 있는 것 제한
+- code Signing: program에 전자 서명 부여
