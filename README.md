@@ -304,12 +304,13 @@ Ex) test_and_set(), compare_and_swap()
 이를 이용하여 atomic variable 생성
 
 ## OS Solution
-### Spinlock
+### Semaphore
 P(), V()라는 atomic operation으로만 접근 가능한 정수형 변수   
 -> OS가 전체 operation이 한 instruction cycle에 수행되도록 보장
 
 ![Alt text](spinlock.PNG)
-Spinlock(S)가 1이면 critical section을 실행 중인 process가 있고, 0이면 없다는 의미   
+
+Semaphore(S)가 1이면 critical section을 실행 중인 process가 있고, 0이면 없다는 의미   
 -> mutual exclusion 보장
 
 But, multi processor 시스템에서만 사용 가능(parallel execution)
