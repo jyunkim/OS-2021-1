@@ -310,13 +310,13 @@ P(), V()라는 atomic operation으로만 접근 가능한 정수형 변수
 
 ![Alt text](spinlock.PNG)
 
-Semaphore(S)가 1이면 critical section을 실행 중인 process가 있고, 0이면 없다는 의미   
+Semaphore(S)가 0이면 critical section을 실행 중인 process가 있고, 1이면 없다는 의미   
 -> mutual exclusion 보장
 
 But, multi processor 시스템에서만 사용 가능(parallel execution)
 
 ## Language-Level Solution
-SW, HW, OS Solution -> Low-level mechanism => 사용하기 어려움, error 발생 확률 높음
+SW, HW, OS Solution -> Low-level mechanism => 사용하기 어려움, error 발생 확률 높음   
 Language-Level Solution -> High-level Mechanism => 프로그래밍 언어 단에서 해결
 ### Monitor
 최대 하나의 process만 접근할 수 있는 공유 데이터와 critical section의 집합   
