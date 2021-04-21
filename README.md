@@ -259,8 +259,8 @@ Ex) producer-consumer problem
 두개의 process가 buffer를 이용하여 asynchronously(동작을 맞추지 않음)하게 실행되며 데이터 공유
 
 count++, count--
-![Alt text](Synchronization1.PNG)
-![Alt text](Synchronization2.PNG)
+![Alt text](./image/Synchronization1.PNG)
+![Alt text](./image/Synchronization2.PNG)
 count에 5가 저장되어야 하지만 경우에 따라 4, 5, 6이 저장됨
 
 ### Race Condition(경쟁 상황)
@@ -292,7 +292,7 @@ critical section에 진입할 수 있는 시간을 한정하여 다른 process�
 아키텍처에 따라 제대로 동작하지 않을 수 있음   
 mutual exclusion, progress, bounded waiting 증명 가능
 
-![Alt text](peterson.PNG)
+![Alt text](./image/peterson.PNG)
 
 ## HW Solutions
 Critical-section problem 해결을 위해 hardware instruction 제공
@@ -308,7 +308,7 @@ Ex) test_and_set(), compare_and_swap()
 P(), V()라는 atomic operation으로만 접근 가능한 정수형 변수   
 -> OS가 전체 operation이 한 instruction cycle에 수행되도록 보장
 
-![Alt text](spinlock.PNG)
+![Alt text](./image/spinlock.PNG)
 
 Semaphore(S)가 0이면 critical section을 실행 중인 process가 있고, 1이면 없다는 의미   
 -> mutual exclusion 보장
@@ -332,7 +332,7 @@ Language-Level Solution -> High-level Mechanism => 프로그래밍 언어 단에
 모니터 내에 자원을 요청하는 function, 자원을 반납하는 function 존재   
 자원을 할당 받을 수 있을 때를 기다리는 condition queue에 signaler queue에서 신호 제공
 
-![Alt text](monitor.PNG)
+![Alt text](./image/monitor.PNG)
 
 과정
 1. 처음 도착한 process(p1)가 자원 요청
@@ -383,7 +383,7 @@ R: resource
 P -> R: request edge   
 R -> P: assignment edge
 
-![Alt text](deadlock.png)
+![Alt text](./image/deadlock.png)
 
 1 -> deadlock   
 2 -> deadlock x
@@ -401,7 +401,7 @@ Process가 시작될 때 해당 process가 평생 쓸 자원의 양을 파악하
 -> process가 추가로 필요한 최대(평생 쓸) 자원의 양이 가용 자원보다 많으면 할당하지 않고, 자원 반납을 통해 가용 자원이 추가되면 다시 확인   
 => 최악의 상황을 고려   
 Ex) Banker's Algorithm
-![Alt text](banker.PNG)
+![Alt text](./image/banker.PNG)
 
 처리   
 - Deadlock Detection and Recovery   
@@ -423,14 +423,14 @@ base register와 limit register를 이용하여 접근 주소 범위 결정
 Program은 binary file로 디스크에 저장되어 있음   
 Program을 실행시키기 위해선 memory로 가져와야됨 -> process   
 
-![Alt text](memory.PNG)
+![Alt text](./image/memory.PNG)
 
 Logical address: CPU에서 사용하는 user program의 주소   
 Physical address: memory의 주소   
 
 **MMU(Memory Management Unit)**   
 logical address를 physical address로 매핑하는 하드웨어
-![Alt text](mmu.PNG)
+![Alt text](./image/mmu.PNG)
 
 ### Dynamic Loading
 전체 program을 memory에 저장하는게 아니라 호출될 때만 load   
@@ -465,7 +465,7 @@ Process의 physical address space가 non-contiguous함
 Physical memory를 고정된 크기의 block(frames), logical memory를 같은 크기의 black(pages)로 쪼갬   
 Logical address = page number + page offset   
 Page table을 통해 page number로부터 frame number를 찾음
-![Alt text](paging.PNG)
+![Alt text](./image/paging.PNG)
 
 ### PTBR(page-table base register)
 Page table은 memory에 두고, CPU의 PTBR을 이용하여 page table을 가리킴   
@@ -499,7 +499,7 @@ Process들의 전체 physical address space가 실제 physical memory를 초과�
 메모리에 완전히 올라가지 않은 process를 실행할 수 있게 하는 기술   
 -> program이 physical memory보다 커도 됨
 
-![](virtual.PNG)
+![](./image/virtual.PNG)
 
 virtual memory와 physical memory를 매핑하고, 실제 memory에 loading되지 않는 page들은 backing store(ex.HDD)에 저장   
 **Page sharing을** 통해 file과 memory 공유가 쉬워짐
@@ -522,7 +522,7 @@ Process가 실행 중일 때는 memory에 있거나 secondary storage에 존재
 5. Page가 valid하다는 것을 나타내기 위해 internal table과 page table 수정
 6. Restart instruction
 
-![](dp.PNG)
+![](./image/dp.PNG)
 
 ### Locality of Reference(참조 국부성)
 Program이 각 instruction마다 몇개의 새로운 page에 접근 -> instruction마다 multiple page faults 발생 가능   
@@ -547,13 +547,13 @@ Linked list로 구성된 free frame list 이용
 
 ### Demand Paging Performance
 **Effective access time**
-![](performance.PNG)
+![](./image/performance.PNG)
 대부분 read하는데 시간 소비
 
 ## Page Replacement
 Free frame이 없을 경우, 현재 사용하지 않는 frame 하나를 비움(secondary storage로)   
 해당 content를 swap space에 write하고 해당 page를 invalid로 page table 수정
-![](pr.PNG)
+![](./image/pr.PNG)
 
 Algorithm - page fault 수를 최소화하는 것이 중요
 
@@ -561,7 +561,7 @@ Algorithm - page fault 수를 최소화하는 것이 중요
 가장 오래된 page를 먼저 교체   
 **Belady's Anomaly**   
 일반적으로 frame이 많을수록 page fault는 줄어들지만, 어느 지점에서 page fault가 늘어나는 현상
-![](ba.PNG)
+![](./image/ba.PNG)
 
 ### Optimal Page replacement(OPT)
 가장 오랜 기간 사용되지 않을 것 같은 page 교체   
@@ -602,7 +602,7 @@ System의 모든 frame 중에서 선택
 ### Thrashing
 Process가 충분한 page를 가지지 않으면 page fault rate이 매우 높아짐   
 빈번한 page in and out으로 인해 CPU utilization이 급격히 떨어지는 현상
-![](thrashing.PNG)
+![](./image/thrashing.PNG)
 
 **Working-Set Model**   
 만약 page가 active하면 working set에 존재   
@@ -614,7 +614,7 @@ Working set에 있는 것만 load => Thrashing 완화
 비휘발성 메모리, secondary storage system   
 Ex) HDD, NVM   
 magnetic tapes, optical disks, cloud storage => RAID system
-![](hdd.PNG)
+![](./image/hdd.PNG)
 
 ### HDD Scheduling
 **목표**   
@@ -680,7 +680,7 @@ File, directory로 구성
 ### Access Method
 - sequential access   
 - direct access(random)
-![](filesys.PNG)
+![](./image/filesys.PNG)
 
 ### Allocation Method
 File에 공간을 어떻게 할당할 것인지   
@@ -716,7 +716,7 @@ unauthorized access, malicious destruction, accidental introduction 등 으로�
 - network
 - operating system
 - application
-![](security.PNG)
+![](./image/security.PNG)
 
 ### Program Threat
 - Malware   
