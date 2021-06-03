@@ -231,6 +231,7 @@ public:
 	string name;
 	int priority;
 	int pid;
+    deque<pair<int, int>> instructions;
 
 	Process() {}
 
@@ -240,6 +241,23 @@ public:
 		priority = priority_;
 		pid = pid_;
 	}
+
+    // 프로그램 명령어 저장
+    void addInstruction(string file_name) {
+        int total_instruction_num;
+        int opcode;
+        int arg;
+
+        ifstream fin;
+        fin.open(file_name);
+        fin >> total_instruction_num;
+
+        for(int i = 0; i < total_instruction_num; i++) {
+            fin >> opcode >> arg;
+            instructions.push_back(make_pair(opcode, arg));
+        }
+        fin.close();
+    }
 };
 
 
@@ -285,7 +303,7 @@ int main(int argc, char *argv[]) {
     }
 
 	// input 파일 파싱
-	string input_file = dir + "/" + "input";
+	string input_file = dir + "/input";
     ifstream fin;
     fin.open(input_file);
 
@@ -299,22 +317,27 @@ int main(int argc, char *argv[]) {
 	int priority;
     int pid = 0;
 
-	// input 두 번째 줄부터
+	// input 두 번째 줄 이후
     for(int i = 0; i < total_event_num; i++) {
         fin >> start_cycle >> code >> priority;
 
+        // I/O 작업
         if(code == "INPUT") {
 			IO io(start_cycle, code, priority);
             ios.push_back(io);
         }
+        // 실행 작업
 		else {
             Process process(start_cycle, code, priority, pid);
+            string program_file = dir + "/" + process.name;
+            process.addInstruction(program_file);
             processes.push_back(process);
             pid++;
         }
     }
 
     // 프로세스 상태 큐
+    Process running_process;
     deque<Process> run_queue0;
     deque<Process> run_queue1;
     deque<Process> run_queue2;
@@ -328,9 +351,6 @@ int main(int argc, char *argv[]) {
     deque<Process> sleep_list;
     deque<Process> iowait_list;
 
-    int process_num = processes.size();
-    int cycle = 0;
-
     // 출력 파일
     string schedule_file = dir + "/scheduler.txt";
     ofstream fout1;
@@ -340,13 +360,47 @@ int main(int argc, char *argv[]) {
     ofstream fout2;
     fout2.open(memory_file);
 
+    int process_num = processes.size();
+    int cycle = 0;
+
+    //작업 수행
     while(process_num > 0) {
-        bool append = false;
+        Process process = processes.front();
+
+        if(process.start_cycle == cycle) {
+            if(process.priority == 0) {
+                run_queue0.push_back(process);
+            }
+            else if(process.priority == 1) {
+                run_queue1.push_back(process);
+            }
+            else if(process.priority == 2) {
+                run_queue2.push_back(process);
+            }
+            else if(process.priority == 3) {
+                run_queue3.push_back(process);
+            }
+            else if(process.priority == 4) {
+                run_queue4.push_back(process);
+            }
+            else if(process.priority == 5) {
+                run_queue5.push_back(process);
+            }
+            else if(process.priority == 6) {
+                run_queue6.push_back(process);
+            }
+            else if(process.priority == 7) {
+                run_queue7.push_back(process);
+            }
+            else if(process.priority == 8) {
+                run_queue8.push_back(process);
+            }
+            else if(process.priority == 9) {
+                run_queue9.push_back(process);
+            }
+        }
         cycle++;
         process_num--;
-
-        fout1 << "Hi";
-        fout2 << "Hello";
     }
 
 	fin.close();
