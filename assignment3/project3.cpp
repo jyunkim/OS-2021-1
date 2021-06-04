@@ -18,7 +18,7 @@ public:
 	int pid;
     
     deque<pair<int, int>> instructions;  // 작업 별 명령어 리스트
-    int current_instruction = 0;  // 현재 수행 중인 명령어 index
+    int current_index = 0;  // 현재 수행 중인 명령어 index
     int sleep_time = 0;  // 남은 sleep time
     int time_quantum = 10;  // 실행된 cycle 수
 
@@ -76,6 +76,7 @@ void checkSleepOver(deque<Process> run_queues[], list<Process> *sleep_list) {
     for(iter = sleep_list->begin(); iter!= sleep_list->end(); iter++) {
         Process *process = &*iter;
         process->sleep_time--;
+        // Sleep 종료
         if(process->sleep_time == 0) {
             process->time_quantum = 10;
             run_queues[process->priority].push_back(*process);
@@ -98,6 +99,7 @@ void checkIO(deque<Process> run_queues[], deque<IO> *ios, list<Process> *iowait_
         if(io.start_cycle == cycle) {
             for(iter = iowait_list->begin(); iter!= iowait_list->end(); iter++) {
                 Process *process = &*iter;
+                // IO 작업 종료
                 if(io.pid == process->pid) {
                     process->time_quantum = 10;
                     run_queues[process->priority].push_back(*process);
@@ -136,7 +138,7 @@ void create_process(deque<Process> run_queues[], deque<Process> *processes, int 
 }
 
 
-// First-come Fisrt-served
+// First-come First-served
 Process *fcfs(deque<Process> run_queues[], Process *running_process) {
     Process *next_process = running_process;
     int priority = running_process->priority;
@@ -164,6 +166,8 @@ Process *rr(deque<Process> run_queues[], Process *running_process) {
     if(running_process->time_quantum == 0) {
         running_process->time_quantum = 10;
         run_queues[priority].push_back(*running_process);
+
+        // 대기하고 있는 프로세스가 있으면 cpu 할당
         for(int i = 0; i < 10; i++) {
             if(!run_queues[i].empty()) {
                 next_process = &run_queues[i].front();
@@ -172,16 +176,23 @@ Process *rr(deque<Process> run_queues[], Process *running_process) {
             }
         }
     }
-    // 현재 실행되고 있는 프로세스보다 우선순위가 높은 프로세스가 있으면 교체
+    // time quantum이 남았을 경우
     else {
+        bool is_empty = true;
+        // 현재 실행되고 있는 프로세스보다 우선순위가 높은 프로세스가 있으면 교체
         for(int i = 0; i < priority; i++) {
             if(!run_queues[i].empty()) {
                 next_process = &run_queues[i].front();
                 run_queues[i].pop_front();
                 running_process->time_quantum = 10;
                 run_queues[priority].push_back(*running_process);
+                is_empty = false;
                 break;
             }
+        }
+        // 없으면 계속 실행
+        if(is_empty) {
+            next_process = running_process;
         }
     }
     return next_process;
@@ -219,35 +230,31 @@ Process *schedule(deque<Process> run_queues[], Process *running_process) {
 }
 
 
-void executeInstruction(Process *process, int cur) {
-    int opcode = process->instructions[cur].first;
-    int arg = process->instructions[cur].second;
+void executeInstruction(Process *running_process) {
+    int current_index = running_process->current_index;
+    int opcode = running_process->instructions[current_index].first;
+    int arg = running_process->instructions[current_index].second;
 
     // Memory allocation
     if(opcode == 0) {
-        // cmd_malloc(currentCpuTask, all_pages, runCmd[1], aid);
     }
     // Memory access
     else if(opcode == 1) {
-        // cmd_memAccess(currentCpuTask, runningTask, physicalMem, physicalNum, runCmd[1], currentCycle, page_opt, page_fault);
     }
     // Memory release
     else if(opcode == 2) {
-        // cmd_memFree(currentCpuTask, runCmd[1], physicalMem, physicalNum);
     }
     // Non-memory instruction
     else if(opcode == 3) {
-        // currentCpuTask->flagToEmpty = false;
-        // currentCpuTask->flagToComplete = true;
+
     }
     // Sleep
     else if(opcode == 4) {
-        // cmd_sleep(currentCpuTask, runCmd[1], sleepList, sched_opt);
         
     }
     // IO wait
     else if(opcode == 5) {
-        // cmd_ioWait(currentCpuTask, ioWaitList, sched_opt);
+
     }
 }
 
@@ -337,6 +344,10 @@ int main(int argc, char *argv[]) {
         create_process(run_queues, &processes, cycle);
 
         running_process = schedule(run_queues, running_process);
+
+        if(running_process->pid >= 0) {
+            executeInstruction(running_process);
+        }
 
         // for(int i = 0; i < 10; i++) {
         //     for(int j = 0; j < run_queues[i].size(); j++) {
