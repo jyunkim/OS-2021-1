@@ -190,7 +190,8 @@ Process *rr(deque<Process> run_queues[], Process *running_process) {
 
 // CPU 스케줄링
 Process *schedule(deque<Process> run_queues[], Process *running_process) {
-    Process *next_process;
+    Process null_process;
+    Process *next_process = &null_process;
     
     // 현재 실행 중인 프로세스가 없을 경우
     if(running_process->pid == -1) {
@@ -324,7 +325,8 @@ int main(int argc, char *argv[]) {
     ofstream fout2;
     fout2.open(memory_file);
 
-    Process *running_process;  // 현재 실행 중인 프로세스(기본 pid = -1)
+    Process null_process;
+    Process *running_process = &null_process;  // 현재 실행 중인 프로세스(기본 pid = -1)
     int total_process_num = processes.size();
     int cycle = 0;
 
