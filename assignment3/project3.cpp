@@ -67,14 +67,14 @@ public:
 
 
 // Sleep된 프로세스의 종료 여부 검사
-void checkSleepOver(deque<Process> *run_queue, list<Process> *sleep_list) {
+void checkSleepOver(deque<Process> run_queues[], list<Process> *sleep_list) {
     list<Process>::iterator iter;
 
     for(iter = sleep_list->begin(); iter!= sleep_list->end(); iter++) {
         Process process = *iter;
         process.sleep_time--;
         if(process.sleep_time == 0) {
-            run_queue->push_back(process);
+            run_queues[process.priority].push_back(process);
             sleep_list->erase(iter);
             return;
         }
@@ -84,7 +84,7 @@ void checkSleepOver(deque<Process> *run_queue, list<Process> *sleep_list) {
 
 
 // IO 작업 시행 여부 검사
-void checkIO(deque<Process> *run_queue, deque<IO> *ios, list<Process> *iowait_list, int cycle) {
+void checkIO(deque<Process> run_queues[], deque<IO> *ios, list<Process> *iowait_list, int cycle) {
     int count = 0;
     list<Process>::iterator iter;
 
@@ -95,7 +95,7 @@ void checkIO(deque<Process> *run_queue, deque<IO> *ios, list<Process> *iowait_li
             for(iter = iowait_list->begin(); iter!= iowait_list->end(); iter++) {
                 Process process = *iter;
                 if(io.pid == process.pid) {
-                    run_queue->push_back(process);
+                    run_queues[process.priority].push_back(process);
                     iowait_list->erase(iter);
                     count++;
                     break;
@@ -112,14 +112,14 @@ void checkIO(deque<Process> *run_queue, deque<IO> *ios, list<Process> *iowait_li
 
 
 // 프로세스 생성 작업 시행
-void create_process(deque<Process> *run_queue, deque<Process> *processes, int cycle) {
+void create_process(deque<Process> run_queues[], deque<Process> *processes, int cycle) {
     int count = 0;
 
     // 같은 time에 여러 작업이 들어올 수 있으므로 순회
     for(int i = 0; i < processes->size(); i++) {
         Process process = processes->at(i);
         if(process.start_cycle == cycle) {
-            run_queue->push_back(process);
+            run_queues[process.priority].push_back(process);
             count++;
         }
     }
@@ -224,16 +224,7 @@ int main(int argc, char *argv[]) {
 
     // 프로세스 상태 큐
     Process running_process;
-    deque<Process> run_queue0;
-    deque<Process> run_queue1;
-    deque<Process> run_queue2;
-    deque<Process> run_queue3;
-    deque<Process> run_queue4;
-    deque<Process> run_queue5;
-    deque<Process> run_queue6;
-    deque<Process> run_queue7;
-    deque<Process> run_queue8;
-    deque<Process> run_queue9;
+    deque<Process> run_queues[10];  // index = priority
     list<Process> sleep_list;
     list<Process> iowait_list;
 
@@ -246,51 +237,43 @@ int main(int argc, char *argv[]) {
     ofstream fout2;
     fout2.open(memory_file);
 
-    int process_num = processes.size();
+    int total_process_num = processes.size();
     int cycle = 0;
 
     //작업 수행
-    while(process_num > 0) {
+    while(total_process_num > 0) {
+        checkSleepOver(run_queues, &sleep_list);
+        checkIO(run_queues, &ios, &iowait_list, cycle);
+        create_process(run_queues, &processes, cycle);
+
         
 
-        if(running_process.start_cycle == cycle) {
-            if(running_process.priority == 0) {
-                run_queue0.push_back(running_process);
-            }
-            else if(running_process.priority == 1) {
-                run_queue1.push_back(running_process);
-            }
-            else if(running_process.priority == 2) {
-                run_queue2.push_back(running_process);
-            }
-            else if(running_process.priority == 3) {
-                run_queue3.push_back(running_process);
-            }
-            else if(running_process.priority == 4) {
-                run_queue4.push_back(running_process);
-            }
-            else if(running_process.priority == 5) {
-                run_queue5.push_back(running_process);
-            }
-            else if(running_process.priority == 6) {
-                run_queue6.push_back(running_process);
-            }
-            else if(running_process.priority == 7) {
-                run_queue7.push_back(running_process);
-            }
-            else if(running_process.priority == 8) {
-                run_queue8.push_back(running_process);
-            }
-            else if(running_process.priority == 9) {
-                run_queue9.push_back(running_process);
-            }
-        }
+        // for(int i = 0; i < 10; i++) {
+        //     for(int j = 0; j < run_queues[i].size(); j++) {
+        //         cout << run_queues[i][j].name << " ";
+        //     }
+        // }
+        // cout << "\n";
+        // list<Process>::iterator iter;
+        // for(iter = sleep_list.begin(); iter!= sleep_list.end(); iter++) {
+        //     Process p = *iter;
+        //     cout << p.name << " ";
+        // }
+        // cout << "\n";
+        // for(iter = iowait_list.begin(); iter!= iowait_list.end(); iter++) {
+        //     Process p = *iter;
+        //     cout << p.name << " ";
+        // }
+        // cout << "\n";
+
         cycle++;
-        process_num--;
+        total_process_num--;
     }
 
+    // open한 파일 close
 	fin.close();
 	fout1.close();
     fout2.close();
+
 	return 0;
 }
