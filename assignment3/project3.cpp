@@ -230,7 +230,17 @@ Process *schedule(deque<Process> run_queues[], Process *running_process) {
 }
 
 
-void executeInstruction(Process *running_process) {
+void sleepInstruction(Process *running_process, list<Process> *sleep_list, int sleep_cycle) {
+    running_process->sleep_time = sleep_cycle;
+
+    // 마지막 명령어가 아닌 경우
+    if(running_process->current_index < running_process->instructions.size()-1) {
+        sleep_list->push_back(*running_process);
+    }
+}
+
+
+void executeInstruction(Process *running_process, list<Process> *sleep_list, list<Process> *iowait_list) {
     int current_index = running_process->current_index;
     int opcode = running_process->instructions[current_index].first;
     int arg = running_process->instructions[current_index].second;
@@ -250,12 +260,17 @@ void executeInstruction(Process *running_process) {
     }
     // Sleep
     else if(opcode == 4) {
-        
+        sleepInstruction(running_process, sleep_list, arg);
     }
     // IO wait
     else if(opcode == 5) {
-
+        // 마지막 명령어가 아닌 경우
+        if(running_process->current_index < running_process->instructions.size()-1) {
+            iowait_list->push_back(*running_process);
+        }
     }
+    running_process->current_index++;
+    running_process->time_quantum--;
 }
 
 
@@ -345,27 +360,16 @@ int main(int argc, char *argv[]) {
 
         running_process = schedule(run_queues, running_process);
 
+        // 실행할 프로세스가 있을 때
         if(running_process->pid >= 0) {
-            executeInstruction(running_process);
+            executeInstruction(running_process, &sleep_list, &iowait_list);
         }
 
-        // for(int i = 0; i < 10; i++) {
-        //     for(int j = 0; j < run_queues[i].size(); j++) {
-        //         cout << run_queues[i][j].name << " ";
-        //     }
-        // }
-        // cout << "\n";
-        // list<Process>::iterator iter;
-        // for(iter = sleep_list.begin(); iter!= sleep_list.end(); iter++) {
-        //     Process p = *iter;
-        //     cout << p.name << " ";
-        // }
-        // cout << "\n";
-        // for(iter = iowait_list.begin(); iter!= iowait_list.end(); iter++) {
-        //     Process p = *iter;
-        //     cout << p.name << " ";
-        // }
-        // cout << "\n";
+        for(int i = 0; i < 10; i++) {
+            for(int j = 0; j < run_queues[i].size(); j++) {
+                cout << run_queues[i][j].name << " ";
+            }
+        }
 
         cycle++;
         total_process_num--;
