@@ -17,7 +17,7 @@ public:
 	int priority;
 	int pid;
 
-    bool blocked = false;  // 중지될 프로세스 인지(출력하고 나서 쫓아냄)
+    bool blocked = false;  // 중지될 프로세스 인지 체크(출력하고 나서 쫓아냄)
     
     deque<pair<int, int>> instructions;  // 작업 별 명령어 리스트
     int current_index = 0;  // 현재 수행 중인 명령어 index
@@ -226,12 +226,15 @@ void schedule(deque<Process> run_queues[], Process cpu[]) {
 }
 
 
+// Sleep 명령어 수행
 void sleepInstruction(Process cpu[], list<Process> *sleep_list, int sleep_cycle) {
     cpu[0].sleep_time = sleep_cycle;
 
     // 마지막 명령어가 아닌 경우
     if(cpu[0].current_index < cpu[0].instructions.size()-1) {
         sleep_list->push_back(cpu[0]);
+        sleep_list->back().blocked = false;
+        sleep_list->back().current_index++;
     }
     cpu[0].blocked = true;
 }
@@ -264,6 +267,8 @@ void executeInstruction(Process cpu[], list<Process> *sleep_list, list<Process> 
         // 마지막 명령어가 아닌 경우
         if(cpu[0].current_index < cpu[0].instructions.size()-1) {
             iowait_list->push_back(cpu[0]);
+            iowait_list->back().blocked = false;
+            iowait_list->back().current_index++;
         }
         cpu[0].blocked = true;
     }
@@ -353,14 +358,15 @@ void printSchedule(FILE *fout, deque<Process> run_queues[], list<Process> *sleep
 void updateState(Process cpu[]) {
     Process null_process;
 
+    // 현재 실행 중인 프로세스가 있을 경우
     if(cpu[0].pid >= 0) {
         cpu[0].run_time++;
         cpu[0].time_quantum--;
         cpu[0].current_index++;
     }
-    
-    if(cpu[0].blocked) {
-        cpu[0].blocked = false;
+
+    // 현재 실행 중인 프로세스가 block될 프로세스이거나, 마지막 명령어일 경우
+    if(cpu[0].blocked || cpu[0].current_index == cpu[0].instructions.size()) {  
         cpu[0] = null_process;
     }
 }
@@ -452,7 +458,7 @@ int main(int argc, char *argv[]) {
         create_process(run_queues, &processes, cycle);
         
         schedule(run_queues, cpu);
-        cout << cycle << " " << cpu[0].pid << " " << cpu[0].current_index << "\n";
+        
         // 실행할 프로세스가 있을 때
         if(cpu[0].pid >= 0) {
             executeInstruction(cpu, &sleep_list, &iowait_list);
@@ -472,9 +478,6 @@ int main(int argc, char *argv[]) {
         }
 
         cycle++;
-        if(cycle == 40) {
-            break;
-        }
     }
     // open한 파일 close
 	fin.close();
