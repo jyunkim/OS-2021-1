@@ -81,7 +81,7 @@ RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
@@ -96,7 +96,7 @@ RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
@@ -111,1056 +111,490 @@ RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
 IOWait List: 0(program1) 1(program2) 
 
-[8 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 4(op 0, arg 11)
+[8 Cycle] Scheduled Process: 0 program1 (priority 6)
+Running Process: Process#0(6) running code program1 line 5(op 5, arg 0)
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: 1(program2) 
+IOWait List: 1(program2) 0(program1) 
 
-[9 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 5(op 0, arg 9)
+[9 Cycle] Scheduled Process: 2 program3 (priority 6)
+Running Process: Process#2(6) running code program3 line 1(op 3, arg 0)
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: 1(program2) 
+IOWait List: 1(program2) 0(program1) 
 
 [10 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 6(op 0, arg 20)
+Running Process: Process#2(6) running code program3 line 2(op 0, arg 16)
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: 1(program2) 
+IOWait List: 1(program2) 0(program1) 
 
 [11 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 7(op 0, arg 10)
+Running Process: Process#2(6) running code program3 line 3(op 0, arg 12)
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: 1(program2) 
+IOWait List: 1(program2) 0(program1) 
 
 [12 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 8(op 0, arg 14)
+Running Process: Process#2(6) running code program3 line 4(op 0, arg 22)
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: 1(program2) 
+IOWait List: 1(program2) 0(program1) 
 
 [13 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 9(op 1, arg 0)
+Running Process: Process#2(6) running code program3 line 5(op 0, arg 14)
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: 1(program2) 
+IOWait List: 1(program2) 0(program1) 
 
 [14 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 10(op 1, arg 1)
+Running Process: Process#2(6) running code program3 line 6(op 5, arg 0)
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
 RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: 1(program2) 
+IOWait List: 1(program2) 0(program1) 
 
-[15 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 11(op 1, arg 0)
+[15 Cycle] Scheduled Process: 1 program2 (priority 3)
+Running Process: Process#1(3) running code program2 line 3(op 5, arg 0)
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [16 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 12(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [17 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 13(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [18 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 14(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [19 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 15(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [20 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 16(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [21 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 17(op 1, arg 1)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [22 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 18(op 1, arg 3)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [23 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 19(op 4, arg 2)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
-SleepList: 1(program2) 
-IOWait List: Empty
+SleepList: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [24 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 20(op 2, arg 3)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
-SleepList: 1(program2) 
-IOWait List: Empty
+SleepList: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [25 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 21(op 1, arg 1)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [26 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 22(op 1, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [27 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 23(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [28 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 24(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [29 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 25(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [30 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 26(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [31 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 27(op 3, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [32 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 28(op 1, arg 1)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [33 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 29(op 1, arg 3)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [34 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 30(op 4, arg 2)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [35 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 31(op 2, arg 3)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [36 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 32(op 0, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [37 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 33(op 0, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [38 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 34(op 0, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
 [39 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 35(op 0, arg 0)
+Running Process: None
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
+RunQueue 3: Empty
 RunQueue 4: Empty
 RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
+RunQueue 6: Empty
 RunQueue 7: Empty
 RunQueue 8: Empty
 RunQueue 9: Empty
 SleepList: Empty
-IOWait List: Empty
+IOWait List: 0(program1) 1(program2) 
 
-[40 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 36(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[41 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 37(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[42 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 38(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[43 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 39(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[44 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 40(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[45 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 41(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[46 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 42(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[47 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 43(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[48 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 44(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[49 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 45(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[50 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 46(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[51 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 47(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[52 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 48(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[53 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 49(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[54 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 50(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[55 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 51(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[56 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 52(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[57 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 53(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[58 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 54(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[59 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 55(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[60 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 56(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[61 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 57(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[62 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 58(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[63 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 59(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[64 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 60(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[65 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 61(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[66 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 62(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[67 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 63(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[68 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 64(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[69 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 65(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[70 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 66(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[71 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 67(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[72 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 68(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[73 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 69(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[74 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 70(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[75 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 71(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[76 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 72(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Empty
-RunQueue 9: Empty
-SleepList: Empty
-IOWait List: Empty
-
-[77 Cycle] Scheduled Process: None
-Running Process: Process#1(3) running code program2 line 73(op 0, arg 0)
-RunQueue 0: Empty
-RunQueue 1: Empty
-RunQueue 2: Empty
-RunQueue 3: 1(program2) 1(program2) 
-RunQueue 4: Empty
-RunQueue 5: Empty
-RunQueue 6: 0(program1) 0(program1) 2(program3) 
-RunQueue 7: Empty
-RunQueue 8: Em

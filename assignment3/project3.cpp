@@ -16,6 +16,8 @@ public:
 	string name;
 	int priority;
 	int pid;
+
+    bool blocked = false;  // 중지될 프로세스 인지(출력하고 나서 쫓아냄)
     
     deque<pair<int, int>> instructions;  // 작업 별 명령어 리스트
     int current_index = 0;  // 현재 수행 중인 명령어 index
@@ -235,9 +237,11 @@ void sleepInstruction(Process cpu[], list<Process> *sleep_list, int sleep_cycle)
     if(cpu[0].current_index < cpu[0].instructions.size()-1) {
         sleep_list->push_back(cpu[0]);
     }
+    cpu[0].blocked = true;
 }
 
 
+// 프로세스 명령어 수행
 void executeInstruction(Process cpu[], list<Process> *sleep_list, list<Process> *iowait_list) {
     int current_index = cpu[0].current_index;
     int opcode = cpu[0].instructions[current_index].first;
@@ -265,10 +269,12 @@ void executeInstruction(Process cpu[], list<Process> *sleep_list, list<Process> 
         if(cpu[0].current_index < cpu[0].instructions.size()-1) {
             iowait_list->push_back(cpu[0]);
         }
+        cpu[0].blocked = true;
     }
 }
 
 
+// 스케줄링 기록 출력
 void printSchedule(FILE *fout, deque<Process> run_queues[], list<Process> *sleep_list, list<Process> *iowait_list, Process cpu[], int cycle) {
     int pid = cpu[0].pid;
     const char *name;
@@ -344,6 +350,24 @@ void printSchedule(FILE *fout, deque<Process> run_queues[], list<Process> *sleep
     fprintf(fout, "\n");
 
     fprintf(fout, "\n");
+}
+
+
+// 출력 이후 상태 갱신
+void updateState(Process cpu[]) {
+    Process null_process;
+
+    if(cpu[0].pid >= 0) {
+        cpu[0].run_time++;
+        cpu[0].time_quantum--;
+        cpu[0].current_index++;
+    }
+    
+    if(cpu[0].blocked) {
+        cpu[0].blocked = false;
+        cpu[0] = null_process;
+    }
+    return;
 }
 
 
@@ -441,7 +465,9 @@ int main(int argc, char *argv[]) {
 
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
 
-        // 종료되지 않은 프로세스 수
+        updateState(cpu);
+
+        // 남아있는 프로세스 수
         total_process_num = sleep_list.size() + iowait_list.size();
         for(int i = 0; i < 10; i++) {
             total_process_num += run_queues[i].size();
@@ -450,10 +476,10 @@ int main(int argc, char *argv[]) {
             total_process_num++;
         }
 
-        cpu[0].run_time++;
-        cpu[0].current_index++;
-        cpu[0].time_quantum--;
         cycle++;
+        if(cycle == 40) {
+            break;
+        }
     }
     // open한 파일 close
 	fin.close();
