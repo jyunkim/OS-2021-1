@@ -76,15 +76,16 @@ public:
 void checkSleepOver(deque<Process> run_queues[], list<Process> *sleep_list) {
     list<Process>::iterator iter;
 
-    for(iter = sleep_list->begin(); iter!= sleep_list->end(); iter++) {
-        Process *process = &*iter;
-        process->sleep_time--;
+    for(iter = sleep_list->begin(); iter!= sleep_list->end();) {
+        iter->sleep_time--;
         // Sleep 종료
-        if(process->sleep_time == 0) {
+        if(iter->sleep_time == 0) {
             // process->time_quantum = 10;
-            run_queues[process->priority].push_back(*process);
-            sleep_list->erase(iter);
-            return;
+            run_queues[iter->priority].push_back(*iter);
+            sleep_list->erase(iter++);
+        }
+        else {
+            iter++;
         }
     }    
     return;
@@ -100,15 +101,16 @@ void checkIO(deque<Process> run_queues[], deque<IO> *ios, list<Process> *iowait_
     for(int i = 0; i < ios->size(); i++) {
         IO io = ios->at(i);
         if(io.start_cycle == cycle) {
-            for(iter = iowait_list->begin(); iter!= iowait_list->end(); iter++) {
-                Process *process = &*iter;
+            for(iter = iowait_list->begin(); iter!= iowait_list->end();) {
                 // IO 작업 종료
-                if(io.pid == process->pid) {
+                if(io.pid == iter->pid) {
                     // process->time_quantum = 10;
-                    run_queues[process->priority].push_back(*process);
-                    iowait_list->erase(iter);
+                    run_queues[iter->priority].push_back(*iter);
+                    iowait_list->erase(iter++);
                     count++;
-                    break;
+                }
+                else {
+                    iter++;
                 }
             }
         }
