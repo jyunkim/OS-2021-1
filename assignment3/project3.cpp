@@ -88,7 +88,6 @@ void checkSleepOver(deque<Process> run_queues[], list<Process> *sleep_list) {
             iter++;
         }
     }    
-    return;
 }
 
 
@@ -119,7 +118,6 @@ void checkIO(deque<Process> run_queues[], deque<IO> *ios, list<Process> *iowait_
     for(int i = 0; i < count; i++) {
         ios->pop_front();
     }
-    return;
 }
 
 
@@ -139,7 +137,6 @@ void create_process(deque<Process> run_queues[], deque<Process> *processes, int 
     for(int i = 0; i < count; i++) {
         processes->pop_front();
     }
-    return;
 }
 
 
@@ -158,7 +155,6 @@ void fcfs(deque<Process> run_queues[], Process cpu[]) {
             break;
         }
     }
-    return;
 }
 
 
@@ -198,7 +194,6 @@ void rr(deque<Process> run_queues[], Process cpu[]) {
             }
         }
     }
-    return;
 }
 
 
@@ -228,7 +223,6 @@ void schedule(deque<Process> run_queues[], Process cpu[]) {
             rr(run_queues, cpu);
         }
     }
-    return;
 }
 
 
@@ -369,7 +363,6 @@ void updateState(Process cpu[]) {
         cpu[0].blocked = false;
         cpu[0] = null_process;
     }
-    return;
 }
 
 
@@ -459,7 +452,7 @@ int main(int argc, char *argv[]) {
         create_process(run_queues, &processes, cycle);
         
         schedule(run_queues, cpu);
-
+        cout << cycle << " " << cpu[0].pid << " " << cpu[0].current_index << "\n";
         // 실행할 프로세스가 있을 때
         if(cpu[0].pid >= 0) {
             executeInstruction(cpu, &sleep_list, &iowait_list);
