@@ -19,8 +19,9 @@ public:
     
     deque<pair<int, int>> instructions;  // 작업 별 명령어 리스트
     int current_index = 0;  // 현재 수행 중인 명령어 index
+    int run_time = 0;  // 실행된 cycle 수
     int sleep_time = 0;  // 남은 sleep time
-    int time_quantum = 10;  // 실행된 cycle 수
+    int time_quantum = 10;  // 남은 time quantum
 
 	Process() {
         pid = -1;
@@ -45,7 +46,7 @@ public:
 
         for(int i = 0; i < total_instruction_num; i++) {
             fin >> opcode >> arg;
-            instructions.push_back(make_pair(opcode, arg));
+            this->instructions.push_back(make_pair(opcode, arg));
         }
         fin.close();
     }
@@ -78,7 +79,7 @@ void checkSleepOver(deque<Process> run_queues[], list<Process> *sleep_list) {
         process->sleep_time--;
         // Sleep 종료
         if(process->sleep_time == 0) {
-            process->time_quantum = 10;
+            // process->time_quantum = 10;
             run_queues[process->priority].push_back(*process);
             sleep_list->erase(iter);
             return;
@@ -101,7 +102,7 @@ void checkIO(deque<Process> run_queues[], deque<IO> *ios, list<Process> *iowait_
                 Process *process = &*iter;
                 // IO 작업 종료
                 if(io.pid == process->pid) {
-                    process->time_quantum = 10;
+                    // process->time_quantum = 10;
                     run_queues[process->priority].push_back(*process);
                     iowait_list->erase(iter);
                     count++;
@@ -149,6 +150,8 @@ Process *fcfs(deque<Process> run_queues[], Process *running_process) {
             next_process = &run_queues[i].front();
             run_queues[i].pop_front();
             run_queues[priority].push_back(*running_process);
+            next_process->run_time = 0;
+            next_process->time_quantum = 10;
             break;
         }
     }
@@ -164,7 +167,7 @@ Process *rr(deque<Process> run_queues[], Process *running_process) {
 
     // 주어진 time quantum을 다 사용하면 run queue로 이동
     if(running_process->time_quantum == 0) {
-        running_process->time_quantum = 10;
+        // running_process->time_quantum = 10;
         run_queues[priority].push_back(*running_process);
 
         // 대기하고 있는 프로세스가 있으면 cpu 할당
@@ -172,6 +175,8 @@ Process *rr(deque<Process> run_queues[], Process *running_process) {
             if(!run_queues[i].empty()) {
                 next_process = &run_queues[i].front();
                 run_queues[i].pop_front();
+                next_process->run_time = 0;
+                next_process->time_quantum = 10;
                 break;
             }
         }
@@ -184,7 +189,9 @@ Process *rr(deque<Process> run_queues[], Process *running_process) {
             if(!run_queues[i].empty()) {
                 next_process = &run_queues[i].front();
                 run_queues[i].pop_front();
-                running_process->time_quantum = 10;
+                next_process->run_time = 0;
+                next_process->time_quantum = 10;
+                // running_process->time_quantum = 10;
                 run_queues[priority].push_back(*running_process);
                 is_empty = false;
                 break;
@@ -210,6 +217,8 @@ Process *schedule(deque<Process> run_queues[], Process *running_process) {
             if(!run_queues[i].empty()) {
                 next_process = &run_queues[i].front();
                 run_queues[i].pop_front();
+                next_process->run_time = 0;
+                next_process->time_quantum = 10;
                 break;
             }
         }
@@ -269,8 +278,87 @@ void executeInstruction(Process *running_process, list<Process> *sleep_list, lis
             iowait_list->push_back(*running_process);
         }
     }
+    running_process->run_time++;
     running_process->current_index++;
     running_process->time_quantum--;
+}
+
+
+void printSchedule(FILE *fout, deque<Process> run_queues[], list<Process> *sleep_list, list<Process> *iowait_list, Process *running_process, int cycle) {
+    int pid = running_process->pid;
+    const char *name;
+    int priority;
+    int current_index;
+    int op;
+    int arg;
+    list<Process>::iterator iter;
+
+    // 실행 중인 프로세스가 있을 경우
+    if(pid >= 0) {
+        name = running_process->name.c_str();
+        priority = running_process->priority;
+        current_index = running_process->current_index;
+        op = running_process->instructions[current_index].first;
+        arg = running_process->instructions[current_index].second;
+    }
+
+    // line 1
+    fprintf(fout, "[%d Cycle] Scheduled Process: ", cycle);
+    if(running_process->run_time == 0 && pid >= 0) {
+        fprintf(fout, "%d %s (priority %d)\n", pid, name, priority);
+    }
+    else {
+        fprintf(fout, "None\n");
+    }
+
+    // line 2
+    fprintf(fout, "Running Process: ");
+    if(pid >= 0) {
+        fprintf(fout, "Process#%d(%d) running code %s line %d(op %d, arg %d)\n", pid, priority, name, current_index+1, op, arg);
+    }
+    else {
+        fprintf(fout, "None\n");
+    }
+
+    // line 3
+    for(int i = 0; i < 10; i++) {
+        fprintf(fout, "RunQueue %d: ", i);
+        if(run_queues[i].empty()) {
+            fprintf(fout, "Empty");
+        }
+        else {
+            for(int j = 0; j < run_queues[i].size(); j++) {
+                fprintf(fout, "%d(%s) ", run_queues[i][j].pid, run_queues[i][j].name.c_str());
+            }
+        }
+        fprintf(fout, "\n");
+    }
+
+    // line 4
+    fprintf(fout, "SleepList: ");
+    if(sleep_list->empty()) {
+        fprintf(fout, "Empty");
+    }
+    else {
+        for(iter = sleep_list->begin(); iter != sleep_list->end(); iter++) {
+            fprintf(fout, "%d(%s) ", (*iter).pid, (*iter).name.c_str());
+        }
+    }
+    fprintf(fout, "\n");
+
+    // line 5
+    fprintf(fout, "IOWait List: ");
+    if(iowait_list->empty()) {
+        fprintf(fout, "Empty");
+    }
+    else {
+        for(iter = iowait_list->begin(); iter != iowait_list->end(); iter++) {
+            fprintf(fout, "%d(%s) ", (*iter).pid, (*iter).name.c_str());
+        }
+    }
+    fprintf(fout, "\n");
+
+    fprintf(fout, "\n");
 }
 
 
@@ -340,12 +428,10 @@ int main(int argc, char *argv[]) {
 
     // 출력 파일
     string schedule_file = dir + "/scheduler.txt";
-    ofstream fout1;
-    fout1.open(schedule_file);
+    FILE* fout1 = fopen(schedule_file.c_str(), "w");
 
     string memory_file = dir + "/memory.txt";
-    ofstream fout2;
-    fout2.open(memory_file);
+    FILE* fout2 = fopen(memory_file.c_str(), "w");
 
     Process null_process;
     Process *running_process = &null_process;  // 현재 실행 중인 프로세스(기본 pid = -1)
@@ -357,7 +443,7 @@ int main(int argc, char *argv[]) {
         checkSleepOver(run_queues, &sleep_list);
         checkIO(run_queues, &ios, &iowait_list, cycle);
         create_process(run_queues, &processes, cycle);
-
+        
         running_process = schedule(run_queues, running_process);
 
         // 실행할 프로세스가 있을 때
@@ -365,20 +451,24 @@ int main(int argc, char *argv[]) {
             executeInstruction(running_process, &sleep_list, &iowait_list);
         }
 
+        printSchedule(fout1, run_queues, &sleep_list, &iowait_list, running_process, cycle);
+
+        // 종료되지 않은 프로세스 수
+        total_process_num = sleep_list.size() + iowait_list.size();
         for(int i = 0; i < 10; i++) {
-            for(int j = 0; j < run_queues[i].size(); j++) {
-                cout << run_queues[i][j].name << " ";
-            }
+            total_process_num += run_queues[i].size();
+        }
+        if(running_process->pid >= 0) {
+            total_process_num++;
         }
 
         cycle++;
-        total_process_num--;
     }
 
     // open한 파일 close
 	fin.close();
-	fout1.close();
-    fout2.close();
+    fclose(fout1);
+    fclose(fout2);
 
 	return 0;
 }
