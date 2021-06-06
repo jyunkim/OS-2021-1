@@ -80,7 +80,6 @@ void checkSleepOver(deque<Process> run_queues[], list<Process> *sleep_list) {
         iter->sleep_time--;
         // Sleep 종료
         if(iter->sleep_time == 0) {
-            // process->time_quantum = 10;
             run_queues[iter->priority].push_back(*iter);
             sleep_list->erase(iter++);
         }
@@ -103,7 +102,6 @@ void checkIO(deque<Process> run_queues[], deque<IO> *ios, list<Process> *iowait_
             for(iter = iowait_list->begin(); iter!= iowait_list->end();) {
                 // IO 작업 종료
                 if(io.pid == iter->pid) {
-                    // process->time_quantum = 10;
                     run_queues[iter->priority].push_back(*iter);
                     iowait_list->erase(iter++);
                     count++;
@@ -163,10 +161,8 @@ void rr(deque<Process> run_queues[], Process cpu[]) {
     Process null_process;
     int priority = cpu[0].priority;
 
-    // 주어진 time quantum을 다 사용하면 run queue로 이동
+    // 주어진 time quantum을 다 사용하면 교체
     if(cpu[0].time_quantum == 0) {
-        // running_process->time_quantum = 10;
-        run_queues[priority].push_back(cpu[0]);
         cpu[0] = null_process;
 
         // 대기하고 있는 프로세스가 있으면 cpu 할당
@@ -241,10 +237,11 @@ void sleepInstruction(Process cpu[], list<Process> *sleep_list, int sleep_cycle)
 
 
 // 프로세스 명령어 수행
-void executeInstruction(Process cpu[], list<Process> *sleep_list, list<Process> *iowait_list) {
+void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process> *sleep_list, list<Process> *iowait_list) {
     int current_index = cpu[0].current_index;
     int opcode = cpu[0].instructions[current_index].first;
     int arg = cpu[0].instructions[current_index].second;
+    int priority = cpu[0].priority;
 
     // Memory allocation
     if(opcode == 0) {
@@ -271,6 +268,14 @@ void executeInstruction(Process cpu[], list<Process> *sleep_list, list<Process> 
             iowait_list->back().current_index++;
         }
         cpu[0].blocked = true;
+    }
+
+    // 우선순위가 5 이상일 경우
+    // time quantum이 1이면 실행 이후 time quantum이 0이 되므로 run queue에 미리 넣어줌
+    // 마지막 명령어라면 수행 x
+    if(priority >= 5 && cpu[0].time_quantum == 1 && cpu[0].current_index < cpu[0].instructions.size()-1) {
+        run_queues[priority].push_back(cpu[0]);
+        run_queues[priority].back().current_index++;
     }
 }
 
@@ -461,7 +466,7 @@ int main(int argc, char *argv[]) {
         
         // 실행할 프로세스가 있을 때
         if(cpu[0].pid >= 0) {
-            executeInstruction(cpu, &sleep_list, &iowait_list);
+            executeInstruction(cpu, run_queues, &sleep_list, &iowait_list);
         }
 
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
