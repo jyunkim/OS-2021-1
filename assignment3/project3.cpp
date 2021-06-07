@@ -412,6 +412,7 @@ int main(int argc, char *argv[]) {
 
 	deque<Process> processes;  // 전체 프로그램 저장
     deque<IO> ios;  // 전체 IO 작업 저장
+
 	int start_cycle;
 	string code;
 	int priority;
@@ -445,9 +446,6 @@ int main(int argc, char *argv[]) {
     Process cpu[1];
     Process running_process;
     cpu[0] = running_process;
-    
-    int total_process_num = processes.size();
-    int cycle = 0;
 
     // 출력 파일
     string schedule_file = dir + "/scheduler.txt";
@@ -456,10 +454,14 @@ int main(int argc, char *argv[]) {
     string memory_file = dir + "/memory.txt";
     FILE* fout2 = fopen(memory_file.c_str(), "w");
 
+    int total_process_num = processes.size();
+    int cycle = 0;
+
     // Cycle 시작
     while(total_process_num > 0) {
         checkSleepOver(run_queues, &sleep_list);
         checkIO(run_queues, &ios, &iowait_list, cycle);
+
         create_process(run_queues, &processes, cycle);
         
         schedule(run_queues, cpu);
