@@ -297,10 +297,19 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
     int p_num = 0;
     int buddy_size = frame_num;
     bool is_page_fault = true;
+    int my_aid = aid;
+
+    // 해당 page id에 해당하는 allocation id 검색
+    for(int i = 0; i < page_num; i++) {
+        if(cpu[0].page_table->page_ids[i] == page_id && cpu[0].page_table->allocation_ids[i] != -1) {
+            my_aid = cpu[0].page_table->allocation_ids[i];
+            break;
+        }
+    }
 
     // Physical memory에 할당된 프레임이 있는지 확인
     for(int i = 0; i < frame_num; i++) {
-        if(physical_memory[i] == aid) {
+        if(physical_memory[i] == my_aid) {
             is_page_fault = false;
         }
     }
@@ -314,7 +323,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
         for(int i = 0; i < page_num; i++) {
             if(cpu[0].page_table->page_ids[i] == page_id) {
                 p_num++;
-                cpu[0].page_table->allocation_ids[i] = aid;
+                cpu[0].page_table->allocation_ids[i] = my_aid;
                 cpu[0].page_table->valid_bits[i] = 1;
             }
         }
@@ -324,7 +333,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
             if(iter->pid == cpu[0].pid) {
                 for(int i = 0; i < page_num; i++) {
                     if(iter->page_table->page_ids[i] == page_id) {
-                        iter->page_table->allocation_ids[i] = aid;
+                        iter->page_table->allocation_ids[i] = my_aid;
                         iter->page_table->valid_bits[i] = 1;
                     }
                 }
@@ -337,11 +346,11 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
         }
         
         bool available = false;
-        // Physical memory에 할당 가능한 frame이 있는지 확인
+        // Physical memory에 할당 가능한 frame이 있는지 확인한 후, 있으면 할당
         for(int i = 0; i < frame_num; i += buddy_size) {
             if(physical_memory[i] == -1) {
                 for(int j = i; j < i + buddy_size; j++) {
-                    physical_memory[j] = aid;
+                    physical_memory[j] = my_aid;
                 }
                 available = true;
                 break;
