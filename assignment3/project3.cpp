@@ -7,6 +7,8 @@
 
 using namespace std;
 
+int aid = 0;  // allocation id
+int page_fault = 0;  // page fault 발생 수
 
 // Page Table
 class PageTable {
@@ -289,6 +291,80 @@ void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
 }
 
 
+// Memory Access 명령어 수행
+void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[], int page_id, int page_num, int frame_num, string algorithm) {
+    list<Process>::iterator iter;
+    int p_num = 0;
+    int buddy_size = frame_num;
+    bool is_page_fault = true;
+
+    // Physical memory에 할당된 프레임이 있는지 확인
+    for(int i = 0; i < frame_num; i++) {
+        if(physical_memory[i] == aid) {
+            is_page_fault = false;
+        }
+    }
+
+    // Physical memory에 할당된 프레임이 없는 경우
+    if(is_page_fault) {
+        page_fault++;
+
+        // 주어진 page id에 해당하는 page table 내 page 수 계산
+        // 해당 page의 allocation id 할당
+        for(int i = 0; i < page_num; i++) {
+            if(cpu[0].page_table->page_ids[i] == page_id) {
+                p_num++;
+                cpu[0].page_table->allocation_ids[i] = aid;
+                cpu[0].page_table->valid_bits[i] = 1;
+            }
+        }
+
+        // processes 리스트도 업데이트
+        for(iter = processes->begin(); iter != processes->end(); iter++) {
+            if(iter->pid == cpu[0].pid) {
+                for(int i = 0; i < page_num; i++) {
+                    if(iter->page_table->page_ids[i] == page_id) {
+                        iter->page_table->allocation_ids[i] = aid;
+                        iter->page_table->valid_bits[i] = 1;
+                    }
+                }
+            }
+        }
+
+        // Buddy system에 의해 할당할 frame 수 계산
+        while(p_num <= buddy_size/2) {
+            buddy_size /= 2;
+        }
+        
+        bool available = false;
+        // Physical memory에 할당 가능한 frame이 있는지 확인
+        for(int i = 0; i < frame_num; i += buddy_size) {
+            if(physical_memory[i] == -1) {
+                for(int j = i; j < i + buddy_size; j++) {
+                    physical_memory[j] = aid;
+                }
+                available = true;
+                break;
+            }
+        }
+
+        // 할당 가능한 frame이 없다면
+        if(!available) {
+            if(algorithm == "lru") {
+
+            }
+            else if(algorithm == "sampled") {
+
+            }
+            else if(algorithm == "clock") {
+
+            }
+        }
+        aid++;
+    }
+}
+
+
 // Sleep 명령어 수행
 void sleepInstruction(Process cpu[], list<Process> *sleep_list, int sleep_cycle) {
     cpu[0].sleep_time = sleep_cycle;
@@ -304,7 +380,7 @@ void sleepInstruction(Process cpu[], list<Process> *sleep_list, int sleep_cycle)
 
 
 // 프로세스 명령어 수행
-void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process> *sleep_list, list<Process> *iowait_list, list<Process> *processes) {
+void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process> *sleep_list, list<Process> *iowait_list, list<Process> *processes, int physical_memory[], int page_num, int frame_num, string algorithm) {
     int current_index = cpu[0].current_index;
     int opcode = cpu[0].instructions[current_index].first;
     int arg = cpu[0].instructions[current_index].second;
@@ -316,6 +392,7 @@ void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process
     }
     // Memory access
     else if(opcode == 1) {
+        memoryAccess(cpu, processes, physical_memory, arg, page_num, frame_num, algorithm);
     }
     // Memory release
     else if(opcode == 2) {
@@ -690,7 +767,6 @@ int main(int argc, char *argv[]) {
 
     int total_process_num = programs.size();
     int cycle = 0;
-    int page_fault = 0;
 
     // Cycle 시작
     while(total_process_num > 0) {
@@ -703,7 +779,7 @@ int main(int argc, char *argv[]) {
         
         // 실행할 프로세스가 있을 때
         if(cpu[0].pid >= 0) {
-            executeInstruction(cpu, run_queues, &sleep_list, &iowait_list, &processes);
+            executeInstruction(cpu, run_queues, &sleep_list, &iowait_list, &processes, physical_memory, page_num, frame_num, page);
         }
 
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
