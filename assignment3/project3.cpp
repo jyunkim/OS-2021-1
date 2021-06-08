@@ -147,7 +147,7 @@ void checkIO(deque<Process> run_queues[], deque<IO> *ios, list<Process> *iowait_
 
 
 // 프로세스 생성 작업 시행
-void create_process(deque<Process> run_queues[], deque<Process> *programs, int cycle, int page_num) {
+void create_process(deque<Process> run_queues[], deque<Process> *programs, list<Process> *processes, int cycle, int page_num) {
     int count = 0;
 
     // 같은 time에 여러 작업이 들어올 수 있으므로 순회
@@ -155,6 +155,7 @@ void create_process(deque<Process> run_queues[], deque<Process> *programs, int c
         Process process = programs->at(i);
         if(process.start_cycle == cycle) {
             process.page_table = new PageTable(page_num);
+            processes->push_back(process);
             run_queues[process.priority].push_back(process);
             count++;
         }
@@ -410,7 +411,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
     // line 1
     // 현재 실행 중인 프로세스가 없을 경우
     if(pid == -1) {
-        fprintf(fout, "[%d Cycle] Input: Function[NO-OP]\n");
+        fprintf(fout, "[%d Cycle] Input: Function[NO-OP]\n", cycle);
     }
     // 현재 실행 중인 프로세스가 있을 경우
     else {
@@ -646,7 +647,7 @@ int main(int argc, char *argv[]) {
         checkSleepOver(run_queues, &sleep_list);
         checkIO(run_queues, &ios, &iowait_list, cycle);
 
-        create_process(run_queues, &programs, cycle, page_num);
+        create_process(run_queues, &programs, &processes, cycle, page_num);
         
         schedule(run_queues, cpu);
         
