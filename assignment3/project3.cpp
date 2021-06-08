@@ -387,6 +387,155 @@ void printSchedule(FILE *fout, deque<Process> run_queues[], list<Process> *sleep
 }
 
 
+// 메모리 정보 출력
+void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physical_memory[], int cycle, int page_num, int frame_num, int page_fault) {
+    int pid = cpu[0].pid;
+    const char *name;
+    int current_index;
+    int op;
+    int arg;
+    int page_id;
+    int p_num = 0;
+    list<Process>::iterator iter;
+
+    // 실행 중인 프로세스가 있을 경우
+    if(pid >= 0) {
+        name = cpu[0].name.c_str();
+        current_index = cpu[0].current_index;
+        op = cpu[0].instructions[current_index].first;
+        arg = cpu[0].instructions[current_index].second;
+        page_id = cpu[0].page_id;
+    }
+
+    // line 1
+    // 현재 실행 중인 프로세스가 없을 경우
+    if(pid == -1) {
+        fprintf(fout, "[%d Cycle] Input: Function[NO-OP]\n");
+    }
+    // 현재 실행 중인 프로세스가 있을 경우
+    else {
+        // Memory allocation
+        if(op == 0) {
+            fprintf(fout, "[%d Cycle] Input: Pid[%d] Function[ALLOCATION] Page ID[%d] Page Num[%d]\n", cycle, pid, page_id, arg);
+        }
+        // memory access
+        else if(op == 1) {
+            for(int i = 0; i < page_num; i++) {
+                if(cpu[0].page_table->page_ids[i] == arg) {
+                    p_num++;
+                }
+            }
+            fprintf(fout, "[%d Cycle] Input: Pid[%d] Function[ACCESS] Page ID[%d] Page Num[%d]\n", cycle, pid, arg, p_num);
+        }
+        // memory release
+        else if(op == 2) {
+            for(int i = 0; i < page_num; i++) {
+                if(cpu[0].page_table->page_ids[i] == arg) {
+                    p_num++;
+                }
+            }
+            fprintf(fout, "[%d Cycle] Input: Pid[%d] Function[RELEASE] Page ID[%d] Page Num[%d]\n", cycle, pid, arg, p_num);
+        }
+        // Non-memory instruction
+        else if(op == 3) {
+            fprintf(fout, "[%d Cycle] Input: Pid[%d] Function[NON-MEMORY]\n", cycle, pid);
+        }
+        // Sleep
+        else if(op == 4) {
+            fprintf(fout, "[%d Cycle] Input: Pid[%d] Function[SLEEP]\n", cycle, pid);
+        }
+        // IO Wait
+        else if(op == 5) {
+            fprintf(fout, "[%d Cycle] Input: Pid[%d] Function[IOWAIT]\n", cycle, pid);
+        }
+    }
+
+    // line 2
+    int aid;
+    fprintf(fout,"%-30s", ">> Physical Memory: ");
+    for(int i = 0; i < frame_num; i++) {
+        aid = physical_memory[i];
+        if(i % 4 == 0) {
+            fprintf(fout, "|");
+        }
+        if(aid == -1) {
+            fprintf(fout, "-");
+        }
+        else {
+            fprintf(fout, "%d", aid);
+        }
+    }
+    fprintf(fout, "|\n");
+
+    // line 3 ~
+    int valid_bit;
+    int reference_bit;
+    for(iter = processes->begin(); iter != processes->end(); iter++) {
+        pid = (*iter).pid;
+        fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(PID): ");
+        for(int i = 0; i < page_num; i++) {
+            page_id = (*iter).page_table->page_ids[i];
+            if(i % 4 == 0) {
+                fprintf(fout, "|");
+            }
+            if(page_id == -1) {
+                fprintf(fout, "-");
+            }
+            else {
+                fprintf(fout, "%d", page_id);
+            }
+        }
+        fprintf(fout, "|\n");
+
+        fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(AID): ");
+        for(int i = 0; i < page_num; i++) {
+            aid = (*iter).page_table->allocation_ids[i];
+            if(i % 4 == 0) {
+                fprintf(fout, "|");
+            }
+            if(aid == -1) {
+                fprintf(fout, "-");
+            }
+            else {
+                fprintf(fout, "%d", aid);
+            }
+        }
+        fprintf(fout, "|\n");
+
+        fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(Valid): ");
+        for(int i = 0; i < page_num; i++) {
+            valid_bit = (*iter).page_table->valid_bits[i];
+            if(i % 4 == 0) {
+                fprintf(fout, "|");
+            }
+            if(valid_bit == -1) {
+                fprintf(fout, "-");
+            }
+            else {
+                fprintf(fout, "%d", valid_bit);
+            }
+        }
+        fprintf(fout, "|\n");
+
+        fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(Ref): ");
+        for(int i = 0; i < page_num; i++) {
+            reference_bit = (*iter).page_table->reference_bits[i];
+            if(i % 4 == 0) {
+                fprintf(fout, "|");
+            }
+            if(reference_bit == -1) {
+                fprintf(fout, "-");
+            }
+            else {
+                fprintf(fout, "%d", reference_bit);
+            }
+        }
+        fprintf(fout, "|\n");
+    }
+    fprintf(fout,"\npage fault = %d\n", page_fault);
+}
+
+
 // 출력 이후 상태 갱신
 void updateState(Process cpu[]) {
     Process null_process;
