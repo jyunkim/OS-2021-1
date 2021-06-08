@@ -291,6 +291,11 @@ void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
 }
 
 
+void lru() {
+
+}
+
+
 // Memory Access 명령어 수행
 void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[], int page_id, int page_num, int frame_num, string algorithm) {
     list<Process>::iterator iter;
@@ -348,7 +353,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
         bool available = false;
         // Physical memory에 할당 가능한 frame이 있는지 확인한 후, 있으면 할당
         for(int i = 0; i < frame_num; i += buddy_size) {
-            if(physical_memory[i] == -1) {
+            if(physical_memory[i] == -1 && physical_memory[i+buddy_size-1] == -1) {
                 for(int j = i; j < i + buddy_size; j++) {
                     physical_memory[j] = my_aid;
                 }
