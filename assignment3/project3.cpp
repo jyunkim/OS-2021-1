@@ -18,6 +18,7 @@ public:
     int *allocation_ids;
     int *reference_bits;
     deque<int> reference_byte;
+    list<int> lru_stack;
 
     PageTable() {}
 
@@ -291,31 +292,33 @@ void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
 }
 
 
-void lru() {
-
-}
-
-
 // Memory Access 명령어 수행
 void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[], int page_id, int page_num, int frame_num, string algorithm) {
     list<Process>::iterator iter;
     int p_num = 0;
     int buddy_size = frame_num;
-    bool is_page_fault = true;
     int my_aid = aid;
+    bool update_aid = true;
+    bool is_page_fault = true;
+    list<int> *stk = &(cpu[0].page_table->lru_stack);
 
     // 해당 page id에 해당하는 allocation id 검색
     for(int i = 0; i < page_num; i++) {
         if(cpu[0].page_table->page_ids[i] == page_id && cpu[0].page_table->allocation_ids[i] != -1) {
             my_aid = cpu[0].page_table->allocation_ids[i];
+            update_aid = false;
             break;
         }
+    }
+    if(update_aid) {
+        aid++;
     }
 
     // Physical memory에 할당된 프레임이 있는지 확인
     for(int i = 0; i < frame_num; i++) {
         if(physical_memory[i] == my_aid) {
             is_page_fault = false;
+            break;
         }
     }
 
@@ -332,7 +335,6 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                 cpu[0].page_table->valid_bits[i] = 1;
             }
         }
-
         // processes 리스트도 업데이트
         for(iter = processes->begin(); iter != processes->end(); iter++) {
             if(iter->pid == cpu[0].pid) {
@@ -342,6 +344,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                         iter->page_table->valid_bits[i] = 1;
                     }
                 }
+                break;
             }
         }
 
@@ -362,10 +365,12 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
             }
         }
 
-        // 할당 가능한 frame이 없다면
-        if(!available) {
+        int victim_aid;
+        // 할당 가능한 frame이 없다면 페이지 교체 알고리즘 수행
+        while(!available) {
             if(algorithm == "lru") {
-
+                victim_aid = stk->front();
+                stk->pop_front();
             }
             else if(algorithm == "sampled") {
 
@@ -373,8 +378,61 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
             else if(algorithm == "clock") {
 
             }
+
+            // Victim swap out
+            for(int i = 0; i < frame_num; i++) {
+                if(physical_memory[i] == victim_aid) {
+                    physical_memory[i] = -1;
+                }
+            }
+
+            // Valid bit 수정
+            for(int i = 0; i < page_num; i++) {
+                if(cpu[0].page_table->allocation_ids[i] == victim_aid) {
+                    cpu[0].page_table->valid_bits[i] = 0;
+                }
+            }
+            // processes 리스트도 업데이트
+            for(iter = processes->begin(); iter != processes->end(); iter++) {
+                if(iter->pid == cpu[0].pid) {
+                    for(int i = 0; i < page_num; i++) {
+                        if(iter->page_table->allocation_ids[i] == victim_aid) {
+                            iter->page_table->valid_bits[i] = 0;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // Swap out 후 할당 가능한지 다시 확인
+            for(int i = 0; i < frame_num; i += buddy_size) {
+                if(physical_memory[i] == -1 && physical_memory[i+buddy_size-1] == -1) {
+                    for(int j = i; j < i + buddy_size; j++) {
+                        physical_memory[j] = my_aid;
+                    }
+                    available = true;
+                    break;
+                }
+            }
         }
-        aid++;
+    }
+
+    // lru 스택 업데이트
+    if(algorithm == "lru") {
+        list<int>::iterator iter;
+        for(iter = stk->begin(); iter != stk->end(); iter++) {
+            if(*iter == my_aid) {
+                stk->erase(iter);
+                break;
+            }
+        }
+        stk->push_back(my_aid);
+    }
+    else if(algorithm == "sampled") {
+
+    }
+    else if(algorithm == "clock") {
+
     }
 }
 
@@ -668,7 +726,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
 
 
 // 출력 이후 상태 갱신
-void updateState(Process cpu[], list<Process> *processes) {
+void updateState(Process cpu[], list<Process> *processes, int physical_memory[], int frame_num, int page_num) {
     Process null_process;
     list<Process>::iterator iter;
 
@@ -681,12 +739,26 @@ void updateState(Process cpu[], list<Process> *processes) {
 
     // 현재 실행 중인 프로세스가 block될 프로세스이거나, 마지막 명령어일 경우
     if(cpu[0].blocked || cpu[0].current_index == cpu[0].instructions.size()) {
-        // 마지막 명령어일 경우 process 종료
+        // 마지막 명령어일 경우
         if(cpu[0].current_index == cpu[0].instructions.size()) {
+            // 프로세스 종료
             for(iter = processes->begin(); iter != processes->end(); iter++) {
                 if(iter->pid == cpu[0].pid) {
                     processes->erase(iter);
                     break;
+                }
+            }
+
+            // Physical memory 할당 해제
+            int aid;
+            for(int i = 0; i < page_num; i++) {
+                aid = cpu[0].page_table->allocation_ids[i];
+                if(aid != -1) {
+                    for(int j = 0; j < frame_num; j++) {
+                        if(aid == physical_memory[j]) {
+                            physical_memory[j] = -1;
+                        }
+                    }
                 }
             }
         }
@@ -799,7 +871,7 @@ int main(int argc, char *argv[]) {
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
         printMemory(fout2, &processes, cpu, physical_memory, cycle, page_num, frame_num);
 
-        updateState(cpu, &processes);
+        updateState(cpu, &processes, physical_memory, frame_num, page_num);
 
         // 남아있는 프로세스 수
         total_process_num = sleep_list.size() + iowait_list.size();
