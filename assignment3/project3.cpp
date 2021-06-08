@@ -538,8 +538,9 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
 
 
 // 출력 이후 상태 갱신
-void updateState(Process cpu[]) {
+void updateState(Process cpu[], list<Process> *processes) {
     Process null_process;
+    list<Process>::iterator iter;
 
     // 현재 실행 중인 프로세스가 있을 경우
     if(cpu[0].pid >= 0) {
@@ -549,7 +550,16 @@ void updateState(Process cpu[]) {
     }
 
     // 현재 실행 중인 프로세스가 block될 프로세스이거나, 마지막 명령어일 경우
-    if(cpu[0].blocked || cpu[0].current_index == cpu[0].instructions.size()) {  
+    if(cpu[0].blocked || cpu[0].current_index == cpu[0].instructions.size()) {
+        // 마지막 명령어일 경우
+        if(cpu[0].current_index == cpu[0].instructions.size()) {
+            for(iter = processes->begin(); iter != processes->end(); iter++) {
+                if(iter->pid == cpu[0].pid) {
+                    processes->erase(iter);
+                    break;
+                }
+            }
+        }
         cpu[0] = null_process;
     }
 }
@@ -660,7 +670,7 @@ int main(int argc, char *argv[]) {
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
         printMemory(fout2, &processes, cpu, physical_memory, cycle, page_num, frame_num);
 
-        updateState(cpu);
+        updateState(cpu, &processes);
 
         // 남아있는 프로세스 수
         total_process_num = sleep_list.size() + iowait_list.size();
