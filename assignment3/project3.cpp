@@ -8,6 +8,30 @@
 using namespace std;
 
 
+// Page Table
+class PageTable {
+public:
+    int *page_ids;
+    int *valid_bits;
+    int *allocation_ids;
+    int *reference_bits;
+    deque<int> reference_byte;
+
+    PageTable() {}
+
+    PageTable(int page_num) {
+        page_ids = new int[page_num];
+        valid_bits = new int[page_num];
+        allocation_ids = new int[page_num];
+        reference_bits = new int[page_num];
+        fill_n(page_ids, page_num, -1);
+        fill_n(valid_bits, page_num, -1);
+        fill_n(allocation_ids, page_num, -1);
+        fill_n(reference_bits, page_num, -1);
+    }
+};
+
+
 // 실행 작업
 class Process {
 public:
@@ -72,30 +96,6 @@ public:
 		name = name_;
 		pid = pid_;
 	}
-};
-
-
-// Page Table
-class PageTable {
-public:
-    int *page_ids;
-    int *valid_bits;
-    int *allocation_ids;
-    int *reference_bits;
-    deque<int> reference_byte;
-
-    PageTable() {}
-
-    PageTable(int page_num) {
-        page_ids = new int[page_num];
-        valid_bits = new int[page_num];
-        allocation_ids = new int[page_num];
-        reference_bits = new int[page_num];
-        fill_n(page_ids, page_num, -1);
-        fill_n(valid_bits, page_num, -1);
-        fill_n(allocation_ids, page_num, -1);
-        fill_n(reference_bits, page_num, -1);
-    }
 };
 
 
@@ -641,6 +641,7 @@ int main(int argc, char *argv[]) {
 
     int total_process_num = programs.size();
     int cycle = 0;
+    int page_fault = 0;
 
     // Cycle 시작
     while(total_process_num > 0) {
@@ -657,6 +658,7 @@ int main(int argc, char *argv[]) {
         }
 
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
+        printMemory(fout2, &processes, cpu, physical_memory, cycle, page_num, frame_num, page_fault);
 
         updateState(cpu);
 
