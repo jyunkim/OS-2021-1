@@ -389,7 +389,7 @@ void printSchedule(FILE *fout, deque<Process> run_queues[], list<Process> *sleep
 
 
 // 메모리 정보 출력
-void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physical_memory[], int cycle, int page_num, int frame_num, int page_fault) {
+void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physical_memory[], int cycle, int page_num, int frame_num) {
     int pid = cpu[0].pid;
     const char *name;
     int current_index;
@@ -453,7 +453,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
 
     // line 2
     int aid;
-    fprintf(fout,"%-30s", ">> Physical Memory: ");
+    fprintf(fout, "%-30s", ">> Physical Memory: ");
     for(int i = 0; i < frame_num; i++) {
         aid = physical_memory[i];
         if(i % 4 == 0) {
@@ -533,7 +533,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
         }
         fprintf(fout, "|\n");
     }
-    fprintf(fout,"\npage fault = %d\n", page_fault);
+    fprintf(fout, "\n");
 }
 
 
@@ -658,7 +658,7 @@ int main(int argc, char *argv[]) {
         }
 
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
-        printMemory(fout2, &processes, cpu, physical_memory, cycle, page_num, frame_num, page_fault);
+        printMemory(fout2, &processes, cpu, physical_memory, cycle, page_num, frame_num);
 
         updateState(cpu);
 
@@ -673,6 +673,8 @@ int main(int argc, char *argv[]) {
 
         cycle++;
     }
+    fprintf(fout2, "page fault = %d\n", page_fault);
+
     // open한 파일 close
 	fin.close();
     fclose(fout1);
