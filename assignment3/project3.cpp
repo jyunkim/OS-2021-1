@@ -469,9 +469,6 @@ void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process
     // Memory release
     else if(opcode == 2) {
     }
-    // Non-memory instruction
-    else if(opcode == 3) {
-    }
     // Sleep
     else if(opcode == 4) {
         sleepInstruction(cpu, sleep_list, arg);
