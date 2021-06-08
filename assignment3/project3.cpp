@@ -19,11 +19,14 @@ public:
 
     PageTable() {}
 
+    // 여러 종류의 bit를 담는 배열을 page 개수 크기로 생성
+    // 배열 요소를 -1로 초기화
     PageTable(int page_num) {
         page_ids = new int[page_num];
         valid_bits = new int[page_num];
         allocation_ids = new int[page_num];
         reference_bits = new int[page_num];
+
         fill_n(page_ids, page_num, -1);
         fill_n(valid_bits, page_num, -1);
         fill_n(allocation_ids, page_num, -1);
@@ -50,7 +53,8 @@ public:
     int time_quantum = 10;  // 남은 time quantum
 
     PageTable *page_table;
-    int page_id = 0;
+    int page_id = 0;  // 다음에 할당할 page id
+    int page_index = 0;  // 다음에 할당할 page index
 
 	Process() {
         pid = -1;
@@ -251,6 +255,40 @@ void schedule(deque<Process> run_queues[], Process cpu[]) {
 }
 
 
+// Memory Allocation 명령어 수행
+void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
+    list<Process>::iterator iter;
+    int page_id = cpu[0].page_id;
+    int page_index = cpu[0].page_index;
+    int *pid = cpu[0].page_table->page_ids;
+    int *valid = cpu[0].page_table->valid_bits;
+
+    // 할당할 page 수만큼 page id, valid bit 입력
+    for(int i = page_index; i < page_index + page_num; i++) {
+        pid[i] = page_id;
+        valid[i] = 0;
+    }
+    cpu[0].page_id++;
+    cpu[0].page_index += page_num;
+
+    // processes 리스트도 업데이트
+    for(iter = processes->begin(); iter != processes->end(); iter++) {
+        if(iter->pid == cpu[0].pid) {
+            pid = iter->page_table->page_ids;
+            valid = iter->page_table->valid_bits;
+            
+            for(int i = page_index; i < page_index + page_num; i++) {
+                pid[i] = page_id;
+                valid[i] = 0;
+            }
+            iter->page_id++;
+            iter->page_index += page_num;
+            break;
+        }
+    }
+}
+
+
 // Sleep 명령어 수행
 void sleepInstruction(Process cpu[], list<Process> *sleep_list, int sleep_cycle) {
     cpu[0].sleep_time = sleep_cycle;
@@ -266,7 +304,7 @@ void sleepInstruction(Process cpu[], list<Process> *sleep_list, int sleep_cycle)
 
 
 // 프로세스 명령어 수행
-void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process> *sleep_list, list<Process> *iowait_list) {
+void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process> *sleep_list, list<Process> *iowait_list, list<Process> *processes) {
     int current_index = cpu[0].current_index;
     int opcode = cpu[0].instructions[current_index].first;
     int arg = cpu[0].instructions[current_index].second;
@@ -274,6 +312,7 @@ void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process
 
     // Memory allocation
     if(opcode == 0) {
+        memoryAllocation(cpu, processes, arg);
     }
     // Memory access
     else if(opcode == 1) {
@@ -405,7 +444,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
         current_index = cpu[0].current_index;
         op = cpu[0].instructions[current_index].first;
         arg = cpu[0].instructions[current_index].second;
-        page_id = cpu[0].page_id;
+        page_id = cpu[0].page_id - 1;
     }
 
     // line 1
@@ -472,7 +511,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
     int valid_bit;
     int reference_bit;
     for(iter = processes->begin(); iter != processes->end(); iter++) {
-        pid = (*iter).pid;
+        pid = iter->pid;
         fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(PID): ");
         for(int i = 0; i < page_num; i++) {
             page_id = (*iter).page_table->page_ids[i];
@@ -551,7 +590,7 @@ void updateState(Process cpu[], list<Process> *processes) {
 
     // 현재 실행 중인 프로세스가 block될 프로세스이거나, 마지막 명령어일 경우
     if(cpu[0].blocked || cpu[0].current_index == cpu[0].instructions.size()) {
-        // 마지막 명령어일 경우
+        // 마지막 명령어일 경우 process 종료
         if(cpu[0].current_index == cpu[0].instructions.size()) {
             for(iter = processes->begin(); iter != processes->end(); iter++) {
                 if(iter->pid == cpu[0].pid) {
@@ -664,7 +703,7 @@ int main(int argc, char *argv[]) {
         
         // 실행할 프로세스가 있을 때
         if(cpu[0].pid >= 0) {
-            executeInstruction(cpu, run_queues, &sleep_list, &iowait_list);
+            executeInstruction(cpu, run_queues, &sleep_list, &iowait_list, &processes);
         }
 
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
