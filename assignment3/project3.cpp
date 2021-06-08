@@ -25,6 +25,9 @@ public:
     int sleep_time = 0;  // 남은 sleep time
     int time_quantum = 10;  // 남은 time quantum
 
+    PageTable *page_table;
+    int page_id = 0;
+
 	Process() {
         pid = -1;
     }
@@ -72,11 +75,35 @@ public:
 };
 
 
+// Page Table
+class PageTable {
+public:
+    int *page_ids;
+    int *valid_bits;
+    int *allocation_ids;
+    int *reference_bits;
+    deque<int> reference_byte;
+
+    PageTable() {}
+
+    PageTable(int page_num) {
+        page_ids = new int[page_num];
+        valid_bits = new int[page_num];
+        allocation_ids = new int[page_num];
+        reference_bits = new int[page_num];
+        fill_n(page_ids, page_num, -1);
+        fill_n(valid_bits, page_num, -1);
+        fill_n(allocation_ids, page_num, -1);
+        fill_n(reference_bits, page_num, -1);
+    }
+};
+
+
 // Sleep된 프로세스의 종료 여부 검사
 void checkSleepOver(deque<Process> run_queues[], list<Process> *sleep_list) {
     list<Process>::iterator iter;
 
-    for(iter = sleep_list->begin(); iter!= sleep_list->end();) {
+    for(iter = sleep_list->begin(); iter != sleep_list->end();) {
         iter->sleep_time--;
         // Sleep 종료
         if(iter->sleep_time == 0) {
@@ -99,7 +126,7 @@ void checkIO(deque<Process> run_queues[], deque<IO> *ios, list<Process> *iowait_
     for(int i = 0; i < ios->size(); i++) {
         IO io = ios->at(i);
         if(io.start_cycle == cycle) {
-            for(iter = iowait_list->begin(); iter!= iowait_list->end();) {
+            for(iter = iowait_list->begin(); iter != iowait_list->end();) {
                 // IO 작업 종료
                 if(io.pid == iter->pid) {
                     run_queues[iter->priority].push_back(*iter);
@@ -120,20 +147,21 @@ void checkIO(deque<Process> run_queues[], deque<IO> *ios, list<Process> *iowait_
 
 
 // 프로세스 생성 작업 시행
-void create_process(deque<Process> run_queues[], deque<Process> *processes, int cycle) {
+void create_process(deque<Process> run_queues[], deque<Process> *programs, int cycle, int page_num) {
     int count = 0;
 
     // 같은 time에 여러 작업이 들어올 수 있으므로 순회
-    for(int i = 0; i < processes->size(); i++) {
-        Process process = processes->at(i);
+    for(int i = 0; i < programs->size(); i++) {
+        Process process = programs->at(i);
         if(process.start_cycle == cycle) {
+            process.page_table = new PageTable(page_num);
             run_queues[process.priority].push_back(process);
             count++;
         }
     }
 
     for(int i = 0; i < count; i++) {
-        processes->pop_front();
+        programs->pop_front();
     }
 }
 
@@ -410,9 +438,9 @@ int main(int argc, char *argv[]) {
 	// input 첫 번째 줄
     fin >> total_event_num >> vm_size >> pm_size >> page_size;
 
-	deque<Process> processes;  // 전체 프로그램 저장
+	deque<Process> programs;  // 전체 프로그램 저장
     deque<IO> ios;  // 전체 IO 작업 저장
-
+    
 	int start_cycle;
 	string code;
 	int priority;
@@ -432,7 +460,7 @@ int main(int argc, char *argv[]) {
             Process process(start_cycle, code, priority, pid);
             string program_file = dir + "/" + process.name;
             process.addInstruction(program_file);
-            processes.push_back(process);
+            programs.push_back(process);
             pid++;
         }
     }
@@ -441,11 +469,18 @@ int main(int argc, char *argv[]) {
     deque<Process> run_queues[10];  // index = priority
     list<Process> sleep_list;
     list<Process> iowait_list;
+    list<Process> processes;  // 종료되지 않은 프로세스
 
     // 현재 실행 중인 프로세스(기본 pid = -1)
     Process cpu[1];
     Process running_process;
     cpu[0] = running_process;
+
+    int page_num = vm_size / page_size;
+    // Physical memory
+    int frame_num = pm_size / page_size;
+    int physical_memory[frame_num];
+    fill_n(physical_memory, frame_num, -1);  // -1로 초기화
 
     // 출력 파일
     string schedule_file = dir + "/scheduler.txt";
@@ -454,7 +489,7 @@ int main(int argc, char *argv[]) {
     string memory_file = dir + "/memory.txt";
     FILE* fout2 = fopen(memory_file.c_str(), "w");
 
-    int total_process_num = processes.size();
+    int total_process_num = programs.size();
     int cycle = 0;
 
     // Cycle 시작
@@ -462,7 +497,7 @@ int main(int argc, char *argv[]) {
         checkSleepOver(run_queues, &sleep_list);
         checkIO(run_queues, &ios, &iowait_list, cycle);
 
-        create_process(run_queues, &processes, cycle);
+        create_process(run_queues, &programs, cycle, page_num);
         
         schedule(run_queues, cpu);
         
