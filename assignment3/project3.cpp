@@ -437,6 +437,29 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
 }
 
 
+// Memory release 명령어 수행
+void memoryRelease(Process cpu[], int physical_memory[], int page_id, int page_num, int frame_num) {
+    int my_aid;
+
+    // Virtual memory에서 해당 page id, allocation id, valid bit 해제
+    for(int i = 0; i < page_num; i++) {
+        if(cpu[0].page_table->page_ids[i] == page_id) {
+            my_aid = cpu[0].page_table->allocation_ids[i];
+            cpu[0].page_table->page_ids[i] = -1;
+            cpu[0].page_table->allocation_ids[i] = -1;
+            cpu[0].page_table->valid_bits[i] = -1;
+        }
+    }
+
+    // Physical memory에서 해당 allocation id 해제
+    for(int i = 0; i < frame_num; i++) {
+        if(physical_memory[i] == my_aid) {
+            physical_memory[i] = -1;
+        }
+    }
+}
+
+
 // Sleep 명령어 수행
 void sleepInstruction(Process cpu[], list<Process> *sleep_list, int sleep_cycle) {
     cpu[0].sleep_time = sleep_cycle;
@@ -468,6 +491,7 @@ void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process
     }
     // Memory release
     else if(opcode == 2) {
+        memoryRelease(cpu, physical_memory, arg, page_num, frame_num);
     }
     // Sleep
     else if(opcode == 4) {
