@@ -552,7 +552,7 @@ void printSchedule(FILE *fout, deque<Process> run_queues[], list<Process> *sleep
     }
     else {
         for(iter = sleep_list->begin(); iter != sleep_list->end(); iter++) {
-            fprintf(fout, "%d(%s) ", (*iter).pid, (*iter).name.c_str());
+            fprintf(fout, "%d(%s) ", iter->pid, iter->name.c_str());
         }
     }
     fprintf(fout, "\n");
@@ -564,7 +564,7 @@ void printSchedule(FILE *fout, deque<Process> run_queues[], list<Process> *sleep
     }
     else {
         for(iter = iowait_list->begin(); iter != iowait_list->end(); iter++) {
-            fprintf(fout, "%d(%s) ", (*iter).pid, (*iter).name.c_str());
+            fprintf(fout, "%d(%s) ", iter->pid, iter->name.c_str());
         }
     }
     fprintf(fout, "\n");
@@ -660,7 +660,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
         pid = iter->pid;
         fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(PID): ");
         for(int i = 0; i < page_num; i++) {
-            page_id = (*iter).page_table->page_ids[i];
+            page_id = iter->page_table->page_ids[i];
             if(i % 4 == 0) {
                 fprintf(fout, "|");
             }
@@ -675,7 +675,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
 
         fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(AID): ");
         for(int i = 0; i < page_num; i++) {
-            aid = (*iter).page_table->allocation_ids[i];
+            aid = iter->page_table->allocation_ids[i];
             if(i % 4 == 0) {
                 fprintf(fout, "|");
             }
@@ -690,7 +690,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
 
         fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(Valid): ");
         for(int i = 0; i < page_num; i++) {
-            valid_bit = (*iter).page_table->valid_bits[i];
+            valid_bit = iter->page_table->valid_bits[i];
             if(i % 4 == 0) {
                 fprintf(fout, "|");
             }
@@ -705,7 +705,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
 
         fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(Ref): ");
         for(int i = 0; i < page_num; i++) {
-            reference_bit = (*iter).page_table->reference_bits[i];
+            reference_bit = iter->page_table->reference_bits[i];
             if(i % 4 == 0) {
                 fprintf(fout, "|");
             }
@@ -732,34 +732,34 @@ void updateState(Process cpu[], list<Process> *processes, int physical_memory[],
         cpu[0].run_time++;
         cpu[0].time_quantum--;
         cpu[0].current_index++;
-    }
 
-    // 현재 실행 중인 프로세스가 block될 프로세스이거나, 마지막 명령어일 경우
-    if(cpu[0].blocked || cpu[0].current_index == cpu[0].instructions.size()) {
-        // 마지막 명령어일 경우
-        if(cpu[0].current_index == cpu[0].instructions.size()) {
-            // 프로세스 종료
-            for(iter = processes->begin(); iter != processes->end(); iter++) {
-                if(iter->pid == cpu[0].pid) {
-                    processes->erase(iter);
-                    break;
+        // 현재 실행 중인 프로세스가 block될 프로세스이거나, 마지막 명령어일 경우
+        if(cpu[0].blocked || cpu[0].current_index == cpu[0].instructions.size()) {
+            // 마지막 명령어일 경우
+            if(cpu[0].current_index == cpu[0].instructions.size()) {
+                // 프로세스 종료
+                for(iter = processes->begin(); iter != processes->end(); iter++) {
+                    if(iter->pid == cpu[0].pid) {
+                        processes->erase(iter);
+                        break;
+                    }
                 }
-            }
 
-            // Physical memory 할당 해제
-            int aid;
-            for(int i = 0; i < page_num; i++) {
-                aid = cpu[0].page_table->allocation_ids[i];
-                if(aid != -1) {
-                    for(int j = 0; j < frame_num; j++) {
-                        if(aid == physical_memory[j]) {
-                            physical_memory[j] = -1;
+                // Physical memory 할당 해제
+                int aid;
+                for(int i = 0; i < page_num; i++) {
+                    aid = cpu[0].page_table->allocation_ids[i];
+                    if(aid != -1) {
+                        for(int j = 0; j < frame_num; j++) {
+                            if(aid == physical_memory[j]) {
+                                physical_memory[j] = -1;
+                            }
                         }
                     }
                 }
             }
+            cpu[0] = null_process;
         }
-        cpu[0] = null_process;
     }
 }
 
@@ -836,8 +836,8 @@ int main(int argc, char *argv[]) {
     cpu[0] = running_process;
 
     int page_num = vm_size / page_size;
-    // Physical memory
     int frame_num = pm_size / page_size;
+    // Physical memory
     int physical_memory[frame_num];
     fill_n(physical_memory, frame_num, -1);  // -1로 초기화
 
