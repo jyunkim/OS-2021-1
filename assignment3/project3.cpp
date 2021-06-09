@@ -4,6 +4,8 @@
 #include <fstream>
 #include <deque>
 #include <list>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -103,6 +105,96 @@ public:
 		name = name_;
 		pid = pid_;
 	}
+};
+
+
+// 분할된 frame
+class Node {
+public:
+    Node *left;
+    Node *right;
+    int start;
+    int end;
+    int size;
+    bool free = true;
+
+    Node() {}
+
+    Node(int frame_num) {
+        start = 0;
+        end = frame_num - 1;
+        size = frame_num;
+    }
+
+    Node(int start_, int end_) {
+        start = start_;
+        end = end_;
+        size = end - start + 1;
+    }
+};
+
+
+// 정렬에 사용할 비교 함수
+bool compare(Node *n1, Node *n2) {
+    // 크기가 같으면 주소가 작은 순서
+    if(n1->size == n2->size) {
+        return n1->start < n2->start;
+    }
+    // 크기가 작은 순서
+    else {
+        return n1->size < n2->size;
+    }
+}
+
+
+// 분할된 frame들을 담는 트리
+class Tree {
+public:
+    Node *root;
+    Node *cur;
+    list<Node*> all_nodes;
+
+    Tree() {}
+
+    Tree(int frame_num) {
+        root = new Node(frame_num);
+        all_nodes.push_back(root);
+        cur = root;
+    }
+
+    // 분할
+    void divide(Node *n) {
+        int mid = (n->end + n->start) / 2;
+        n->left = new Node(n->start, mid);
+        n->right = new Node(mid+1, n->end);
+        all_nodes.push_back(n->left);
+        all_nodes.push_back(n->right);
+        n->free = false;
+    }
+
+    // 병합
+    void merge(Node *n) {
+        all_nodes.remove(n->left);
+        all_nodes.remove(n->right);
+        n->left = nullptr;
+        n->right = nullptr;
+        n->free = true;
+    }
+
+    // Free frame을 담은 리스트 반환
+    vector<Node*> getLeaves() {
+        vector<Node*> leaves;
+        list<Node*>::iterator iter;
+        for(iter = all_nodes.begin(); iter != all_nodes.end(); iter++) {
+            // 자식 노드가 항상 2개씩 생기므로 left만 검사
+            if((*iter)->left == nullptr && (*iter)->free) {
+                leaves.push_back(*iter);
+            }
+        }
+        // 크기, 주소 오름차순 정렬
+        sort(leaves.begin(), leaves.end(), compare);
+        return leaves;
+    }
 };
 
 
@@ -293,7 +385,7 @@ void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
 
 
 // Memory Access 명령어 수행
-void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[], int page_id, int page_num, int frame_num, string algorithm) {
+void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[], Tree *buddy, int page_id, int page_num, int frame_num, string algorithm) {
     list<Process>::iterator iter;
     int p_num = 0;
     int buddy_size = frame_num;
@@ -310,6 +402,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
             break;
         }
     }
+    // Allocation id가 할당되어 있지 않으면 aid +1
     if(update_aid) {
         aid++;
     }
@@ -326,6 +419,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
     if(is_page_fault) {
         page_fault++;
 
+        // Page table 갱신
         // 주어진 page id에 해당하는 page table 내 page 수 계산
         // 해당 page의 allocation id 할당
         for(int i = 0; i < page_num; i++) {
@@ -354,14 +448,31 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
         }
         
         bool available = false;
-        // Physical memory에 할당 가능한 frame이 있는지 확인한 후, 있으면 할당
-        for(int i = 0; i < frame_num; i += buddy_size) {
-            if(physical_memory[i] == -1 && physical_memory[i+buddy_size-1] == -1) {
-                for(int j = i; j < i + buddy_size; j++) {
-                    physical_memory[j] = my_aid;
-                }
+        vector<Node*> free_frames = buddy->getLeaves();  // Free frames
+        Node *target_frame;
+
+        // 요청된 page를 수용 가능한 공간 탐색
+        for(int i = 0; i < free_frames.size(); i++) {
+            // 크기로 오름차순 정렬되어 있기 때문에 할당해야 되는 frame 수 이상이면 선택
+            if(buddy_size <= free_frames[i]->size) {
+                target_frame = free_frames[i];
                 available = true;
                 break;
+            }
+        }
+
+        // 할당 가능한 공간이 있으면
+        if(available) {
+            // Buddy system에 의해 공간 분할
+            while(buddy_size != target_frame->size) {
+                buddy->divide(target_frame);
+                target_frame = target_frame->left;
+            }
+
+            // Physical memory frame 할당
+            target_frame->free = false;
+            for(int i = target_frame->start; i <= target_frame->end; i++) {
+                physical_memory[i] = my_aid;
             }
         }
 
@@ -475,7 +586,7 @@ void sleepInstruction(Process cpu[], list<Process> *sleep_list, int sleep_cycle)
 
 
 // 프로세스 명령어 수행
-void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process> *sleep_list, list<Process> *iowait_list, list<Process> *processes, int physical_memory[], int page_num, int frame_num, string algorithm) {
+void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process> *sleep_list, list<Process> *iowait_list, list<Process> *processes, int physical_memory[], Tree *buddy, int page_num, int frame_num, string algorithm) {
     int current_index = cpu[0].current_index;
     int opcode = cpu[0].instructions[current_index].first;
     int arg = cpu[0].instructions[current_index].second;
@@ -487,7 +598,7 @@ void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process
     }
     // Memory access
     else if(opcode == 1) {
-        memoryAccess(cpu, processes, physical_memory, arg, page_num, frame_num, algorithm);
+        memoryAccess(cpu, processes, physical_memory, buddy, arg, page_num, frame_num, algorithm);
     }
     // Memory release
     else if(opcode == 2) {
@@ -859,11 +970,16 @@ int main(int argc, char *argv[]) {
     Process running_process;
     cpu[0] = running_process;
 
+    // Page, frame 총 개수
     int page_num = vm_size / page_size;
     int frame_num = pm_size / page_size;
+
     // Physical memory
     int physical_memory[frame_num];
     fill_n(physical_memory, frame_num, -1);  // -1로 초기화
+
+    // Buddy가 담긴 트리
+    Tree buddy(frame_num);
 
     // 출력 파일
     string schedule_file = dir + "/scheduler.txt";
@@ -886,7 +1002,7 @@ int main(int argc, char *argv[]) {
         
         // 실행할 프로세스가 있을 때
         if(cpu[0].pid >= 0) {
-            executeInstruction(cpu, run_queues, &sleep_list, &iowait_list, &processes, physical_memory, page_num, frame_num, page);
+            executeInstruction(cpu, run_queues, &sleep_list, &iowait_list, &processes, physical_memory, &buddy, page_num, frame_num, page);
         }
 
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
