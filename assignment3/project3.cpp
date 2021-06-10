@@ -1098,9 +1098,10 @@ int main(int argc, char *argv[]) {
 	// 프로그램 실행 명령어 파싱
 	for(int i = 1; i < argc; i++) {
         string option = argv[i];
-        int oper = option.find("=") + 1;
-        string opt_name = option.substr(0, oper);
-        string opt_detail = option.substr(oper, option.length());
+        int name_size = option.find("=") + 1;
+        int detail_length = option.size() - name_size;
+        string opt_name = option.substr(0, name_size);
+        string opt_detail = option.substr(name_size, detail_length);
 
         if(opt_name == "-page=") {
             page = opt_detail;
@@ -1138,7 +1139,7 @@ int main(int argc, char *argv[]) {
         // 실행 작업
 		else {
             Process process(start_cycle, code, priority, pid);
-            string program_file = dir + "/" + process.name;
+            string program_file = dir + "/" + code;
             process.addInstruction(program_file);
             programs.push_back(process);
             pid++;
