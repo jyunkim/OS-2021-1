@@ -57,9 +57,10 @@ public:
     int sleep_time = 0;  // 남은 sleep time
     int time_quantum = 10;  // 남은 time quantum
 
-    PageTable *page_table;
+    PageTable *page_table;  // Page table
     int page_id = 0;  // 다음에 할당할 page id
     int page_index = 0;  // 다음에 할당할 page index
+    int release_num = 0;  // Release한 page 수
 
 	Process() {
         pid = -1;
@@ -609,6 +610,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
 // Memory release 명령어 수행
 void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[], Tree *buddy, int page_id, int page_num, int frame_num) {
     int my_aid;
+    int count = 0;
     list<Process>::iterator iter;
 
     // Virtual memory에서 해당 page id, allocation id, valid bit 해제
@@ -618,6 +620,7 @@ void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[
             cpu[0].page_table->page_ids[i] = -1;
             cpu[0].page_table->allocation_ids[i] = -1;
             cpu[0].page_table->valid_bits[i] = -1;
+            count++;
         }
     }
 
@@ -634,10 +637,11 @@ void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[
             break;
         }
     }
+    cpu[0].release_num = count;
 
     // Physical memory에서 해당 allocation id 해제
     int start;
-    int count = 0;
+    count = 0;
     for(int i = 0; i < frame_num; i++) {
         if(physical_memory[i] == my_aid) {
             if(count == 0) {
@@ -827,6 +831,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
     int arg;
     int page_id;
     int p_num = 0;
+    int release_num;
     list<Process>::iterator iter;
 
     // 실행 중인 프로세스가 있을 경우
@@ -836,6 +841,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
         op = cpu[0].instructions[current_index].first;
         arg = cpu[0].instructions[current_index].second;
         page_id = cpu[0].page_id - 1;
+        release_num = cpu[0].release_num;
     }
 
     // line 1
@@ -860,12 +866,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
         }
         // memory release
         else if(op == 2) {
-            for(int i = 0; i < page_num; i++) {
-                if(cpu[0].page_table->page_ids[i] == arg) {
-                    p_num++;
-                }
-            }
-            fprintf(fout, "[%d Cycle] Input: Pid[%d] Function[RELEASE] Page ID[%d] Page Num[%d]\n", cycle, pid, arg, p_num);
+            fprintf(fout, "[%d Cycle] Input: Pid[%d] Function[RELEASE] Page ID[%d] Page Num[%d]\n", cycle, pid, arg, release_num);
         }
         // Non-memory instruction
         else if(op == 3) {
