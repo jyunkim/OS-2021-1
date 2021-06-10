@@ -912,7 +912,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
 
     // line 2
     int aid;
-    fprintf(fout, "%-30s", ">> Physical Memory: ");
+    fprintf(fout, "%-29s", ">> Physical Memory: ");
     for(int i = 0; i < frame_num; i++) {
         aid = physical_memory[i];
         if(i % 4 == 0) {
