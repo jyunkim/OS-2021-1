@@ -6,6 +6,7 @@
 #include <list>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 
@@ -19,13 +20,13 @@ public:
     int *valid_bits;
     int *allocation_ids;
     int *reference_bits;
-    deque<int> reference_byte;
+    vector<pair<int, deque<int>>> reference_bytes;
     list<int> lru_stack;
 
     PageTable() {}
 
     // 여러 종류의 bit를 담는 배열을 page 개수 크기로 생성
-    // 배열 요소를 -1로 초기화
+    // 배열 요소 초기화
     PageTable(int page_num) {
         page_ids = new int[page_num];
         valid_bits = new int[page_num];
@@ -35,7 +36,7 @@ public:
         fill_n(page_ids, page_num, -1);
         fill_n(valid_bits, page_num, -1);
         fill_n(allocation_ids, page_num, -1);
-        fill_n(reference_bits, page_num, 0);
+        fill_n(reference_bits, page_num, -1);
     }
 };
 
@@ -357,12 +358,38 @@ void schedule(deque<Process> run_queues[], Process cpu[]) {
 }
 
 
+// Reference byte 갱신
+void updateReferenceByte(list<Process> *processes, int page_num) {
+    list<Process>::iterator iter;
+
+    for(iter = processes->begin(); iter != processes->end(); iter++) {
+        // reference byte 갱신
+        for(int i = 0; i < iter->page_table->reference_bytes.size(); i++) {
+            int page_id = iter->page_table->reference_bytes[i].first;
+            deque<int> *reference_byte = &(iter->page_table->reference_bytes[i].second);
+            for(int j = 0; j < page_num; j++) {
+                if(iter->page_table->page_ids[j] == page_id) {
+                    reference_byte->push_front(iter->page_table->reference_bits[j]);
+                    reference_byte->pop_back();
+                    break;
+                }
+            }
+        }
+        // reference bit 초기화
+        for(int i = 0; i < page_num; i++) {
+            if(iter->page_table->page_ids[i] != -1) {
+                iter->page_table->reference_bits[i] = 0;
+            }
+        }
+    }
+}
+
+
 // Memory Allocation 명령어 수행
 void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
     list<Process>::iterator iter;
     int page_id = cpu[0].page_id;
     int *pid = cpu[0].page_table->page_ids;
-    int *valid = cpu[0].page_table->valid_bits;
     int i;
     int start = 0;
     bool free = false;
@@ -384,10 +411,12 @@ void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
         }
     }
     
-    // 할당할 page 수만큼 page id, valid bit 입력
+    // 할당할 page 수만큼 page table 입력
     for(int i = start; i < start + page_num; i++) {
         pid[i] = page_id;
-        valid[i] = 0;
+        cpu[0].page_table->valid_bits[i] = 0;
+        cpu[0].page_table->reference_bits[i] = 0;
+        
     }
     cpu[0].page_id++;
 
@@ -395,16 +424,78 @@ void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
     for(iter = processes->begin(); iter != processes->end(); iter++) {
         if(iter->pid == cpu[0].pid) {
             pid = iter->page_table->page_ids;
-            valid = iter->page_table->valid_bits;
             
             for(int i = start; i < start + page_num; i++) {
                 pid[i] = page_id;
-                valid[i] = 0;
+                iter->page_table->valid_bits[i] = 0;
+                iter->page_table->reference_bits[i] = 0;
             }
             iter->page_id++;
             break;
         }
     }
+
+    // Reference byte 생성
+    deque<int> dq(8);
+    cpu[0].page_table->reference_bytes.push_back(make_pair(page_id, dq));
+}
+
+
+// Reference byte의 크기 측정
+int byteToInt(deque<int> reference_byte) {
+    int sum = 0;
+    int magnitude = pow(2, 7);
+    for(int i = 0; i < reference_byte.size(); i++) {
+        sum += reference_byte[i] * magnitude;
+        magnitude /= 2;
+    }
+
+    return sum;
+}
+
+
+// 가장 작은 reference byte를 가진 page의 allocation id 반환
+int sampledLru(list<Process> *processes, int physical_memory[], int page_num, int frame_num) {
+    int my_aid;
+    int victim_aid;
+    int min_byte;
+    list<Process>::iterator iter;
+
+    for(iter = processes->begin(); iter != processes->end(); iter++) {
+        for(int i = 0; i < iter->page_table->reference_bytes.size(); i++) {
+            int page_id = iter->page_table->reference_bytes[i].first;
+            deque<int> reference_byte = iter->page_table->reference_bytes[i].second;
+            // 해당 page id의 allocation id 찾음
+            for(int j = 0; j < page_num; j++) {
+                if(iter->page_table->page_ids[j] == page_id) {
+                    my_aid = iter->page_table->allocation_ids[j];
+                    break;
+                }
+            }
+            // 할당된 적이 있으면
+            if(my_aid != -1) {
+                // 해당 allocation id가 physical memory에 있는지 확인
+                for(int j = 0; j < frame_num; j++) {
+                    if(physical_memory[j] == my_aid) {
+                        // 그 중 가장 작은 byte 선택
+                        int tmp = byteToInt(reference_byte);
+                        if(tmp < min_byte) {
+                            min_byte = tmp;
+                            victim_aid = my_aid;
+                        }
+                        // 크기가 같으면 allocation id가 작은 것 선택
+                        else if(tmp == min_byte) {
+                            if(my_aid < victim_aid) {
+                                min_byte = tmp;
+                                victim_aid = my_aid;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return victim_aid;
 }
 
 
@@ -417,6 +508,24 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
     bool update_aid = true;
     bool is_page_fault = true;
     list<int> *stk = &(cpu[0].page_table->lru_stack);
+
+    // Reference bit 업데이트
+    for(int i = 0; i < page_num; i++) {
+        if(cpu[0].page_table->page_ids[i] == page_id) {
+            cpu[0].page_table->reference_bits[i] = 1;
+        }
+    }
+    // processes 리스트도 업데이트
+    for(iter = processes->begin(); iter != processes->end(); iter++) {
+        if(iter->pid == cpu[0].pid) {
+            for(int i = 0; i < page_num; i++) {
+                if(iter->page_table->page_ids[i] == page_id) {
+                    iter->page_table->reference_bits[i] = 1;
+                }
+            }
+            break;
+        }
+    }
 
     // 해당 page id에 해당하는 allocation id 검색
     for(int i = 0; i < page_num; i++) {
@@ -509,7 +618,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                 stk->pop_front();
             }
             else if(algorithm == "sampled") {
-
+                victim_aid = sampledLru(processes, physical_memory, page_num, frame_num);
             }
             else if(algorithm == "clock") {
 
@@ -558,10 +667,11 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                 }
             }
 
-            // Valid bit 수정
+            // Page table 수정
             for(int i = 0; i < page_num; i++) {
                 if(cpu[0].page_table->allocation_ids[i] == victim_aid) {
                     cpu[0].page_table->valid_bits[i] = 0;
+                    cpu[0].page_table->reference_bits[i] = 0;
                 }
             }
             // processes 리스트도 업데이트
@@ -570,6 +680,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                     for(int i = 0; i < page_num; i++) {
                         if(iter->page_table->allocation_ids[i] == victim_aid) {
                             iter->page_table->valid_bits[i] = 0;
+                            iter->page_table->reference_bits[i] = 0;
                         }
                     }
                     break;
@@ -604,22 +715,14 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
     }
 
     // lru 스택 업데이트
-    if(algorithm == "lru") {
-        list<int>::iterator iter;
-        for(iter = stk->begin(); iter != stk->end(); iter++) {
-            if(*iter == my_aid) {
-                stk->erase(iter);
-                break;
-            }
+    list<int>::iterator iter3;
+    for(iter3 = stk->begin(); iter3 != stk->end(); iter3++) {
+        if(*iter3 == my_aid) {
+            stk->erase(iter3);
+            break;
         }
-        stk->push_back(my_aid);
     }
-    else if(algorithm == "sampled") {
-
-    }
-    else if(algorithm == "clock") {
-
-    }
+    stk->push_back(my_aid);
 }
 
 
@@ -630,13 +733,14 @@ void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[
     list<Process>::iterator iter;
     list<int> *stk = &(cpu[0].page_table->lru_stack);
 
-    // Virtual memory에서 해당 page id, allocation id, valid bit 해제
+    // Virtual memory에서 해제
     for(int i = 0; i < page_num; i++) {
         if(cpu[0].page_table->page_ids[i] == page_id) {
             my_aid = cpu[0].page_table->allocation_ids[i];
             cpu[0].page_table->page_ids[i] = -1;
             cpu[0].page_table->allocation_ids[i] = -1;
             cpu[0].page_table->valid_bits[i] = -1;
+            cpu[0].page_table->reference_bits[i] = -1;
             count++;
         }
     }
@@ -649,6 +753,7 @@ void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[
                     iter->page_table->page_ids[i] = 1;
                     iter->page_table->allocation_ids[i] = -1;
                     iter->page_table->valid_bits[i] = 1;
+                    iter->page_table->reference_bits[i] = -1;
                 }
             }
             break;
@@ -700,14 +805,21 @@ void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[
         }
     }
 
-    // LRU algorithm이면 lru stack에서 제거
-    if(algorithm == "lru") {
-        list<int>::iterator iter3;
-        for(iter3 = stk->begin(); iter3 != stk->end(); iter3++) {
-            if(*iter3 == my_aid) {
-                stk->erase(iter3);
-                break;
-            }
+    // lru stack에서 제거
+    list<int>::iterator iter3;
+    for(iter3 = stk->begin(); iter3 != stk->end(); iter3++) {
+        if(*iter3 == my_aid) {
+            stk->erase(iter3);
+            break;
+        }
+    }
+
+    // reference byte 제거
+    vector<pair<int, deque<int>>>::iterator iter4;
+    for(iter4 = cpu[0].page_table->reference_bytes.begin(); iter4 != cpu[0].page_table->reference_bytes.end(); iter4++) {
+        if(iter4->first == page_id) {
+            cpu[0].page_table->reference_bytes.erase(iter4);
+            break;
         }
     }
 }
@@ -911,18 +1023,18 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
     }
 
     // line 2
-    int aid;
+    int my_aid;
     fprintf(fout, "%-29s", ">> Physical Memory: ");
     for(int i = 0; i < frame_num; i++) {
-        aid = physical_memory[i];
+        my_aid = physical_memory[i];
         if(i % 4 == 0) {
             fprintf(fout, "|");
         }
-        if(aid == -1) {
+        if(my_aid == -1) {
             fprintf(fout, "-");
         }
         else {
-            fprintf(fout, "%d", aid);
+            fprintf(fout, "%d", my_aid);
         }
     }
     fprintf(fout, "|\n");
@@ -949,15 +1061,15 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
 
         fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(AID): ");
         for(int i = 0; i < page_num; i++) {
-            aid = iter->page_table->allocation_ids[i];
+            my_aid = iter->page_table->allocation_ids[i];
             if(i % 4 == 0) {
                 fprintf(fout, "|");
             }
-            if(aid == -1) {
+            if(my_aid == -1) {
                 fprintf(fout, "-");
             }
             else {
-                fprintf(fout, "%d", aid);
+                fprintf(fout, "%d", my_aid);
             }
         }
         fprintf(fout, "|\n");
@@ -992,7 +1104,12 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
                 if(i % 4 == 0) {
                     fprintf(fout, "|");
                 }
-                fprintf(fout, "%d", reference_bit);
+                if(reference_bit == -1) {
+                    fprintf(fout, "-");
+                }
+                else {
+                    fprintf(fout, "%d", reference_bit);
+                }
             }
         }
         fprintf(fout, "|\n");
@@ -1186,6 +1303,11 @@ int main(int argc, char *argv[]) {
         create_process(run_queues, &programs, &processes, cycle, page_num);
         
         schedule(run_queues, cpu);
+        
+        // Sampled lru일 경우 time interval(8 cycle) 마다 reference byte 갱신
+        if(page == "sampled" && cycle % 8 == 0) {
+            updateReferenceByte(&processes, page_num);
+        }
         
         // 실행할 프로세스가 있을 때
         if(cpu[0].pid >= 0) {
