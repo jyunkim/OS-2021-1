@@ -939,21 +939,26 @@ void updateState(Process cpu[], list<Process> *processes, int physical_memory[],
                 }
 
                 // Physical memory 할당 해제
-                int aid;
+                int my_aid;
                 for(int i = 0; i < page_num; i++) {
-                    aid = cpu[0].page_table->allocation_ids[i];
-                    if(aid != -1) {
+                    my_aid = cpu[0].page_table->allocation_ids[i];
+                    if(my_aid != -1) {
                         int start;
                         int count = 0;
 
                         for(int j = 0; j < frame_num; j++) {
-                            if(physical_memory[j] == aid) {
+                            if(physical_memory[j] == my_aid) {
                                 if(count == 0) {
                                     start = j;
                                 }
                                 physical_memory[j] = -1;
                                 count++;
                             }
+                        }
+
+                        // Physical frame에 해당 aid가 없으면 pass
+                        if(count == 0) {
+                            continue;
                         }
                         int end = start + count - 1;
 
@@ -963,15 +968,28 @@ void updateState(Process cpu[], list<Process> *processes, int physical_memory[],
                         for(iter2 = buddy->all_nodes.begin(); iter2 != buddy->all_nodes.end(); iter2++) {
                             if((*iter2)->start == start && (*iter2)->end == end) {
                                 (*iter2)->free = true;
-                                target_frame = (*iter2)->parent;
+                                // Root 노드 일 경우
+                                if((*iter2)->parent == nullptr) {
+                                    target_frame = (*iter2);
+                                }
+                                else {
+                                    target_frame = (*iter2)->parent;
+                                }
                                 break;
                             }
                         }
 
                         // Buddy 병합
-                        while(target_frame->left->free && target_frame->right->free) {
+                        // 트리에 root 노드 하나만 있을 경우 병합 x
+                        while(buddy->all_nodes.size() > 1 && target_frame->left->free && target_frame->right->free) {
                             buddy->merge(target_frame);
-                            target_frame = target_frame->parent;
+                            // Root 노드면 중단
+                            if(target_frame->parent == nullptr) {
+                                break;
+                            }
+                            else {
+                                target_frame = target_frame->parent;
+                            }
                         }
                     }
                 }
