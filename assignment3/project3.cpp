@@ -113,6 +113,7 @@ class Node {
 public:
     Node *left;
     Node *right;
+    Node *parent;
     int start;
     int end;
     int size;
@@ -136,7 +137,7 @@ public:
 
 // 정렬에 사용할 비교 함수
 bool compare(Node *n1, Node *n2) {
-    // 크기가 같으면 주소가 작은 순서
+    // 크기가 같으면 시작 주소가 작은 순서
     if(n1->size == n2->size) {
         return n1->start < n2->start;
     }
@@ -167,8 +168,13 @@ public:
         int mid = (n->end + n->start) / 2;
         n->left = new Node(n->start, mid);
         n->right = new Node(mid+1, n->end);
+
+        n->left->parent = n;
+        n->right->parent = n;
+
         all_nodes.push_back(n->left);
         all_nodes.push_back(n->right);
+
         n->free = false;
     }
 
@@ -178,6 +184,7 @@ public:
         all_nodes.remove(n->right);
         n->left = nullptr;
         n->right = nullptr;
+
         n->free = true;
     }
 
@@ -402,7 +409,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
             break;
         }
     }
-    // Allocation id가 할당되어 있지 않으면 aid +1
+    // 이전에 할당한 적이 없으면 aid + 1
     if(update_aid) {
         aid++;
     }
@@ -479,6 +486,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
         int victim_aid;
         // 할당 가능한 frame이 없다면 페이지 교체 알고리즘 수행
         while(!available) {
+            // lru 스택 앞에서 victim 가져옴
             if(algorithm == "lru") {
                 victim_aid = stk->front();
                 stk->pop_front();
@@ -490,10 +498,46 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
 
             }
 
+            int start;
+            int count = 0;
             // Victim swap out
             for(int i = 0; i < frame_num; i++) {
                 if(physical_memory[i] == victim_aid) {
+                    if(count == 0) {
+                        start = i;
+                    }
                     physical_memory[i] = -1;
+                    count++;
+                }
+            }
+            int end = start + count - 1;
+
+            // 할당했던 frame을 free frame으로 변환
+            list<Node*>::iterator iter2;
+            for(iter2 = buddy->all_nodes.begin(); iter2 != buddy->all_nodes.end(); iter2++) {
+                if((*iter2)->start == start && (*iter2)->end == end) {
+                    (*iter2)->free = true;
+                    // Root 노드 일 경우
+                    if((*iter2)->parent == nullptr) {
+                        target_frame = (*iter2);
+                    }
+                    else {
+                        target_frame = (*iter2)->parent;
+                    }
+                    break;
+                }
+            }
+
+            // Buddy 병합
+            // 트리에 root 노드 하나만 있을 경우 병합 x
+            while(buddy->all_nodes.size() > 1 && target_frame->left->free && target_frame->right->free) {
+                buddy->merge(target_frame);
+                // Root 노드면 중단
+                if(target_frame->parent == nullptr) {
+                    break;
+                }
+                else {
+                    target_frame = target_frame->parent;
                 }
             }
 
@@ -515,14 +559,28 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                 }
             }
 
-            // Swap out 후 할당 가능한지 다시 확인
-            for(int i = 0; i < frame_num; i += buddy_size) {
-                if(physical_memory[i] == -1 && physical_memory[i+buddy_size-1] == -1) {
-                    for(int j = i; j < i + buddy_size; j++) {
-                        physical_memory[j] = my_aid;
-                    }
+            // 요청된 page 수용 가능 공간 재탐색
+            free_frames = buddy->getLeaves();
+            for(int i = 0; i < free_frames.size(); i++) {
+                if(buddy_size <= free_frames[i]->size) {
+                    target_frame = free_frames[i];
                     available = true;
                     break;
+                }
+            }
+
+            // 할당 가능한 공간이 있으면
+            if(available) {
+                // Buddy system에 의해 공간 분할
+                while(buddy_size != target_frame->size) {
+                    buddy->divide(target_frame);
+                    target_frame = target_frame->left;
+                }
+
+                // Physical memory frame 할당
+                target_frame->free = false;
+                for(int i = target_frame->start; i <= target_frame->end; i++) {
+                    physical_memory[i] = my_aid;
                 }
             }
         }
@@ -602,7 +660,7 @@ void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process
     }
     // Memory release
     else if(opcode == 2) {
-        memoryRelease(cpu, physical_memory, arg, page_num, frame_num);
+        // memoryRelease(cpu, physical_memory, arg, page_num, frame_num);
     }
     // Sleep
     else if(opcode == 4) {
@@ -858,7 +916,7 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
 
 
 // 출력 이후 상태 갱신
-void updateState(Process cpu[], list<Process> *processes, int physical_memory[], int frame_num, int page_num) {
+void updateState(Process cpu[], list<Process> *processes, int physical_memory[], Tree *buddy, int frame_num, int page_num) {
     Process null_process;
     list<Process>::iterator iter;
 
@@ -885,10 +943,35 @@ void updateState(Process cpu[], list<Process> *processes, int physical_memory[],
                 for(int i = 0; i < page_num; i++) {
                     aid = cpu[0].page_table->allocation_ids[i];
                     if(aid != -1) {
+                        int start;
+                        int count = 0;
+
                         for(int j = 0; j < frame_num; j++) {
-                            if(aid == physical_memory[j]) {
+                            if(physical_memory[j] == aid) {
+                                if(count == 0) {
+                                    start = j;
+                                }
                                 physical_memory[j] = -1;
+                                count++;
                             }
+                        }
+                        int end = start + count - 1;
+
+                        // 할당했던 frame을 free frame으로 변환
+                        list<Node*>::iterator iter2;
+                        Node *target_frame;
+                        for(iter2 = buddy->all_nodes.begin(); iter2 != buddy->all_nodes.end(); iter2++) {
+                            if((*iter2)->start == start && (*iter2)->end == end) {
+                                (*iter2)->free = true;
+                                target_frame = (*iter2)->parent;
+                                break;
+                            }
+                        }
+
+                        // Buddy 병합
+                        while(target_frame->left->free && target_frame->right->free) {
+                            buddy->merge(target_frame);
+                            target_frame = target_frame->parent;
                         }
                     }
                 }
@@ -899,7 +982,6 @@ void updateState(Process cpu[], list<Process> *processes, int physical_memory[],
 }
 
 
-// ./project3 -page=lru -dir=/home/jihyun/OS-2021-1/assignment3
 int main(int argc, char *argv[]) {
     int total_event_num;
     int vm_size;
@@ -1008,7 +1090,7 @@ int main(int argc, char *argv[]) {
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
         printMemory(fout2, &processes, cpu, physical_memory, cycle, page_num, frame_num);
 
-        updateState(cpu, &processes, physical_memory, frame_num, page_num);
+        updateState(cpu, &processes, physical_memory, &buddy, frame_num, page_num);
 
         // 남아있는 프로세스 수
         total_process_num = sleep_list.size() + iowait_list.size();
