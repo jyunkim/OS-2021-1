@@ -35,7 +35,7 @@ public:
         fill_n(page_ids, page_num, -1);
         fill_n(valid_bits, page_num, -1);
         fill_n(allocation_ids, page_num, -1);
-        fill_n(reference_bits, page_num, -1);
+        fill_n(reference_bits, page_num, 0);
     }
 };
 
@@ -59,7 +59,6 @@ public:
 
     PageTable *page_table;  // Page table
     int page_id = 0;  // 다음에 할당할 page id
-    int page_index = 0;  // 다음에 할당할 page index
     int release_num = 0;  // Release한 page 수
 
 	Process() {
@@ -362,17 +361,35 @@ void schedule(deque<Process> run_queues[], Process cpu[]) {
 void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
     list<Process>::iterator iter;
     int page_id = cpu[0].page_id;
-    int page_index = cpu[0].page_index;
     int *pid = cpu[0].page_table->page_ids;
     int *valid = cpu[0].page_table->valid_bits;
+    int i;
+    int start = 0;
+    bool free = false;
 
+    // 할당 가능한 공간 탐색
+    while(!free) {
+        for(i = start; i < start + page_num; i++) {
+            if(pid[i] != -1) {
+                break;
+            }
+        }
+        // 해당 범위가 모두 비어있으면
+        if(i == start + page_num) {
+            free = true;
+        }
+        // 해당 범위에 하나라도 차있으면 이후 범위 재탐색
+        else {
+            start = i + 1;
+        }
+    }
+    
     // 할당할 page 수만큼 page id, valid bit 입력
-    for(int i = page_index; i < page_index + page_num; i++) {
+    for(int i = start; i < start + page_num; i++) {
         pid[i] = page_id;
         valid[i] = 0;
     }
     cpu[0].page_id++;
-    cpu[0].page_index += page_num;
 
     // processes 리스트도 업데이트
     for(iter = processes->begin(); iter != processes->end(); iter++) {
@@ -380,12 +397,11 @@ void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
             pid = iter->page_table->page_ids;
             valid = iter->page_table->valid_bits;
             
-            for(int i = page_index; i < page_index + page_num; i++) {
+            for(int i = start; i < start + page_num; i++) {
                 pid[i] = page_id;
                 valid[i] = 0;
             }
             iter->page_id++;
-            iter->page_index += page_num;
             break;
         }
     }
@@ -608,10 +624,11 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
 
 
 // Memory release 명령어 수행
-void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[], Tree *buddy, int page_id, int page_num, int frame_num) {
+void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[], Tree *buddy, int page_id, int page_num, int frame_num, string algorithm) {
     int my_aid;
     int count = 0;
     list<Process>::iterator iter;
+    list<int> *stk = &(cpu[0].page_table->lru_stack);
 
     // Virtual memory에서 해당 page id, allocation id, valid bit 해제
     for(int i = 0; i < page_num; i++) {
@@ -682,6 +699,17 @@ void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[
             target_frame = target_frame->parent;
         }
     }
+
+    // LRU algorithm이면 lru stack에서 제거
+    if(algorithm == "lru") {
+        list<int>::iterator iter3;
+        for(iter3 = stk->begin(); iter3 != stk->end(); iter3++) {
+            if(*iter3 == my_aid) {
+                stk->erase(iter3);
+                break;
+            }
+        }
+    }
 }
 
 
@@ -716,7 +744,7 @@ void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process
     }
     // Memory release
     else if(opcode == 2) {
-        memoryRelease(cpu, processes, physical_memory, buddy, arg, page_num, frame_num);
+        memoryRelease(cpu, processes, physical_memory, buddy, arg, page_num, frame_num, algorithm);
     }
     // Sleep
     else if(opcode == 4) {
