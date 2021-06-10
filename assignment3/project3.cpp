@@ -607,8 +607,9 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
 
 
 // Memory release 명령어 수행
-void memoryRelease(Process cpu[], int physical_memory[], int page_id, int page_num, int frame_num) {
+void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[], Tree *buddy, int page_id, int page_num, int frame_num) {
     int my_aid;
+    list<Process>::iterator iter;
 
     // Virtual memory에서 해당 page id, allocation id, valid bit 해제
     for(int i = 0; i < page_num; i++) {
@@ -620,10 +621,61 @@ void memoryRelease(Process cpu[], int physical_memory[], int page_id, int page_n
         }
     }
 
+    // processes 리스트도 업데이트
+    for(iter = processes->begin(); iter != processes->end(); iter++) {
+        if(iter->pid == cpu[0].pid) {
+            for(int i = 0; i < page_num; i++) {
+                if(iter->page_table->page_ids[i] == page_id) {
+                    iter->page_table->page_ids[i] = 1;
+                    iter->page_table->allocation_ids[i] = -1;
+                    iter->page_table->valid_bits[i] = 1;
+                }
+            }
+            break;
+        }
+    }
+
     // Physical memory에서 해당 allocation id 해제
+    int start;
+    int count = 0;
     for(int i = 0; i < frame_num; i++) {
         if(physical_memory[i] == my_aid) {
+            if(count == 0) {
+                start = i;
+            }
             physical_memory[i] = -1;
+            count++;
+        }
+    }
+    int end = start + count - 1;
+
+    // 할당했던 frame을 free frame으로 변환
+    list<Node*>::iterator iter2;
+    Node *target_frame;
+    for(iter2 = buddy->all_nodes.begin(); iter2 != buddy->all_nodes.end(); iter2++) {
+        if((*iter2)->start == start && (*iter2)->end == end) {
+            (*iter2)->free = true;
+            // Root 노드 일 경우
+            if((*iter2)->parent == nullptr) {
+                target_frame = (*iter2);
+            }
+            else {
+                target_frame = (*iter2)->parent;
+            }
+            break;
+        }
+    }
+
+    // Buddy 병합
+    // 트리에 root 노드 하나만 있을 경우 병합 x
+    while(buddy->all_nodes.size() > 1 && target_frame->left->free && target_frame->right->free) {
+        buddy->merge(target_frame);
+        // Root 노드면 중단
+        if(target_frame->parent == nullptr) {
+            break;
+        }
+        else {
+            target_frame = target_frame->parent;
         }
     }
 }
@@ -660,7 +712,7 @@ void executeInstruction(Process cpu[], deque<Process> run_queues[], list<Process
     }
     // Memory release
     else if(opcode == 2) {
-        // memoryRelease(cpu, physical_memory, arg, page_num, frame_num);
+        memoryRelease(cpu, processes, physical_memory, buddy, arg, page_num, frame_num);
     }
     // Sleep
     else if(opcode == 4) {
