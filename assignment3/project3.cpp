@@ -560,7 +560,7 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                 }
             }
 
-            // 요청된 page 수용 가능 공간 재탐색
+            // 요청된 page를 수용할 수 있는지 확인
             free_frames = buddy->getLeaves();
             for(int i = 0; i < free_frames.size(); i++) {
                 if(buddy_size <= free_frames[i]->size) {
@@ -823,7 +823,7 @@ void printSchedule(FILE *fout, deque<Process> run_queues[], list<Process> *sleep
 
 
 // 메모리 정보 출력
-void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physical_memory[], int cycle, int page_num, int frame_num) {
+void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physical_memory[], int cycle, int page_num, int frame_num, string algorithm) {
     int pid = cpu[0].pid;
     const char *name;
     int current_index;
@@ -950,15 +950,20 @@ void printMemory(FILE *fout, list<Process> *processes, Process cpu[], int physic
         fprintf(fout, "|\n");
 
         fprintf(fout, ">> pid(%d)%-20s", pid, " Page Table(Ref): ");
-        for(int i = 0; i < page_num; i++) {
-            reference_bit = iter->page_table->reference_bits[i];
-            if(i % 4 == 0) {
-                fprintf(fout, "|");
-            }
-            if(reference_bit == -1) {
+        if(algorithm == "lru") {
+            for(int i = 0; i < page_num; i++) {
+                if(i % 4 == 0) {
+                    fprintf(fout, "|");
+                }
                 fprintf(fout, "-");
             }
-            else {
+        }
+        else {
+            for(int i = 0; i < page_num; i++) {
+                reference_bit = iter->page_table->reference_bits[i];
+                if(i % 4 == 0) {
+                    fprintf(fout, "|");
+                }
                 fprintf(fout, "%d", reference_bit);
             }
         }
@@ -1159,7 +1164,7 @@ int main(int argc, char *argv[]) {
         }
 
         printSchedule(fout1, run_queues, &sleep_list, &iowait_list, cpu, cycle);
-        printMemory(fout2, &processes, cpu, physical_memory, cycle, page_num, frame_num);
+        printMemory(fout2, &processes, cpu, physical_memory, cycle, page_num, frame_num, page);
 
         updateState(cpu, &processes, physical_memory, &buddy, frame_num, page_num);
 
