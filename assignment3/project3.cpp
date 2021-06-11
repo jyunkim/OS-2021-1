@@ -195,7 +195,7 @@ public:
         list<Node*>::iterator iter;
         for(iter = all_nodes.begin(); iter != all_nodes.end(); iter++) {
             // 자식 노드가 항상 2개씩 생기므로 left만 검사
-            if((*iter)->left == nullptr && (*iter)->free) {
+            if((*iter)->right == nullptr && (*iter)->free) {
                 leaves.push_back(*iter);
             }
         }
