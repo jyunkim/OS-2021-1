@@ -194,7 +194,7 @@ public:
         vector<Node*> leaves;
         list<Node*>::iterator iter;
         for(iter = all_nodes.begin(); iter != all_nodes.end(); iter++) {
-            // 자식 노드가 항상 2개씩 생기므로 left만 검사
+            // 자식 노드가 항상 2개씩 생기므로 right만 검사
             if((*iter)->right == nullptr && (*iter)->free) {
                 leaves.push_back(*iter);
             }
@@ -364,102 +364,12 @@ void updateReferenceByte(Process cpu[], list<Process> *processes, deque<Process>
     int page_id;
     deque<int> *reference_byte;
 
-    // cpu
-    if(cpu[0].pid >= 0) {
-        for(int i = 0; i < cpu[0].page_table->reference_bytes.size(); i++) {
-            page_id = cpu[0].page_table->reference_bytes[i].first;
-            reference_byte = &(cpu[0].page_table->reference_bytes[i].second);
-            // reference bytes에서 가지고 있는 page id와 같은 page id를 가진 page table의 reference bit을 앞에 삽입
-            for(int j = 0; j < page_num; j++) {
-                if(cpu[0].page_table->page_ids[j] == page_id) {
-                    reference_byte->push_front(cpu[0].page_table->reference_bits[j]);
-                    reference_byte->pop_back();
-                    break;
-                }
-            }
-        }
-        // reference bit 초기화
-        for(int i = 0; i < page_num; i++) {
-            if(cpu[0].page_table->page_ids[i] != -1) {
-                cpu[0].page_table->reference_bits[i] = 0;
-            }
-        }
-    }
-
-    // processes queue
     for(iter = processes->begin(); iter != processes->end(); iter++) {
         // reference byte 갱신
         for(int i = 0; i < iter->page_table->reference_bytes.size(); i++) {
             page_id = iter->page_table->reference_bytes[i].first;
             reference_byte = &(iter->page_table->reference_bytes[i].second);
-            for(int j = 0; j < page_num; j++) {
-                if(iter->page_table->page_ids[j] == page_id) {
-                    reference_byte->push_front(iter->page_table->reference_bits[j]);
-                    reference_byte->pop_back();
-                    break;
-                }
-            }
-        }
-        // reference bit 초기화
-        for(int i = 0; i < page_num; i++) {
-            if(iter->page_table->page_ids[i] != -1) {
-                iter->page_table->reference_bits[i] = 0;
-            }
-        }
-    }
-
-    // run queue
-    for(int i = 0; i < 10; i++) {
-        for(int j = 0; j < run_queues[i].size(); j++) {
-            // reference byte 갱신
-            for(int k = 0; k < run_queues[i][j].page_table->reference_bytes.size(); k++) {
-                page_id = run_queues[i][j].page_table->reference_bytes[k].first;
-                reference_byte = &(run_queues[i][j].page_table->reference_bytes[k].second);
-                for(int l = 0; l < page_num; l++) {
-                    if(run_queues[i][j].page_table->page_ids[l] == page_id) {
-                        reference_byte->push_front(run_queues[i][j].page_table->reference_bits[l]);
-                        reference_byte->pop_back();
-                        break;
-                    }
-                }
-            }
-            // reference bit 초기화
-            for(int k = 0; k < page_num; k++) {
-                if(run_queues[i][j].page_table->page_ids[k] != -1) {
-                    run_queues[i][j].page_table->reference_bits[k] = 0;
-                }
-            }
-        }
-    }
-
-    // sleep list
-    for(iter = sleep_list->begin(); iter != sleep_list->end(); iter++) {
-        // reference byte 갱신
-        for(int i = 0; i < iter->page_table->reference_bytes.size(); i++) {
-            page_id = iter->page_table->reference_bytes[i].first;
-            reference_byte = &(iter->page_table->reference_bytes[i].second);
-            for(int j = 0; j < page_num; j++) {
-                if(iter->page_table->page_ids[j] == page_id) {
-                    reference_byte->push_front(iter->page_table->reference_bits[j]);
-                    reference_byte->pop_back();
-                    break;
-                }
-            }
-        }
-        // reference bit 초기화
-        for(int i = 0; i < page_num; i++) {
-            if(iter->page_table->page_ids[i] != -1) {
-                iter->page_table->reference_bits[i] = 0;
-            }
-        }
-    }
-
-    // iowait list
-    for(iter = iowait_list->begin(); iter != iowait_list->end(); iter++) {
-        // reference byte 갱신
-        for(int i = 0; i < iter->page_table->reference_bytes.size(); i++) {
-            page_id = iter->page_table->reference_bytes[i].first;
-            reference_byte = &(iter->page_table->reference_bytes[i].second);
+            // reference bytes에서 가지고 있는 page id와 같은 page id를 가진 page table의 reference bit을 앞에 삽입
             for(int j = 0; j < page_num; j++) {
                 if(iter->page_table->page_ids[j] == page_id) {
                     reference_byte->push_front(iter->page_table->reference_bits[j]);
@@ -515,13 +425,6 @@ void memoryAllocation(Process cpu[], list<Process> *processes, int page_num) {
     // processes 리스트도 업데이트
     for(iter = processes->begin(); iter != processes->end(); iter++) {
         if(iter->pid == cpu[0].pid) {
-            pid = iter->page_table->page_ids;
-            
-            for(int i = start; i < start + page_num; i++) {
-                pid[i] = page_id;
-                iter->page_table->valid_bits[i] = 0;
-                iter->page_table->reference_bits[i] = 0;
-            }
             iter->page_id++;
             break;
         }
@@ -609,17 +512,6 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
             cpu[0].page_table->reference_bits[i] = 1;
         }
     }
-    // processes 리스트도 업데이트
-    for(iter = processes->begin(); iter != processes->end(); iter++) {
-        if(iter->pid == cpu[0].pid) {
-            for(int i = 0; i < page_num; i++) {
-                if(iter->page_table->page_ids[i] == page_id) {
-                    iter->page_table->reference_bits[i] = 1;
-                }
-            }
-            break;
-        }
-    }
 
     // 해당 page id에 해당하는 allocation id 검색
     for(int i = 0; i < page_num; i++) {
@@ -654,18 +546,6 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                 p_num++;
                 cpu[0].page_table->allocation_ids[i] = my_aid;
                 cpu[0].page_table->valid_bits[i] = 1;
-            }
-        }
-        // processes 리스트도 업데이트
-        for(iter = processes->begin(); iter != processes->end(); iter++) {
-            if(iter->pid == cpu[0].pid) {
-                for(int i = 0; i < page_num; i++) {
-                    if(iter->page_table->page_ids[i] == page_id) {
-                        iter->page_table->allocation_ids[i] = my_aid;
-                        iter->page_table->valid_bits[i] = 1;
-                    }
-                }
-                break;
             }
         }
 
@@ -768,18 +648,6 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                     cpu[0].page_table->reference_bits[i] = 0;
                 }
             }
-            // processes 리스트도 업데이트
-            for(iter = processes->begin(); iter != processes->end(); iter++) {
-                if(iter->pid == cpu[0].pid) {
-                    for(int i = 0; i < page_num; i++) {
-                        if(iter->page_table->allocation_ids[i] == victim_aid) {
-                            iter->page_table->valid_bits[i] = 0;
-                            iter->page_table->reference_bits[i] = 0;
-                        }
-                    }
-                    break;
-                }
-            }
 
             // 요청된 page를 수용할 수 있는지 확인
             free_frames = buddy->getLeaves();
@@ -837,21 +705,6 @@ void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[
             cpu[0].page_table->valid_bits[i] = -1;
             cpu[0].page_table->reference_bits[i] = -1;
             count++;
-        }
-    }
-
-    // processes 리스트도 업데이트
-    for(iter = processes->begin(); iter != processes->end(); iter++) {
-        if(iter->pid == cpu[0].pid) {
-            for(int i = 0; i < page_num; i++) {
-                if(iter->page_table->page_ids[i] == page_id) {
-                    iter->page_table->page_ids[i] = 1;
-                    iter->page_table->allocation_ids[i] = -1;
-                    iter->page_table->valid_bits[i] = 1;
-                    iter->page_table->reference_bits[i] = -1;
-                }
-            }
-            break;
         }
     }
     cpu[0].release_num = count;
@@ -1416,14 +1269,7 @@ int main(int argc, char *argv[]) {
         updateState(cpu, &processes, physical_memory, &buddy, frame_num, page_num);
 
         // 남아있는 프로세스 수
-        total_process_num = sleep_list.size() + iowait_list.size();
-        total_process_num += programs.size();
-        for(int i = 0; i < 10; i++) {
-            total_process_num += run_queues[i].size();
-        }
-        if(cpu[0].pid >= 0) {
-            total_process_num++;
-        }
+        total_process_num = processes.size() + programs.size();
 
         cycle++;
     }
