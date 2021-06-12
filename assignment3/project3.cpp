@@ -511,9 +511,11 @@ int clockLru(list<Process> *processes, int page_num, int my_aid) {
         for(iter = processes->begin(); iter != processes->end(); iter++) {
             for(int i = 0; i < page_num; i++) {
                 if(iter->page_table->allocation_ids[i] == clock_hand && iter->page_table->valid_bits[i] == 1 && clock_hand != my_aid) {
+                    // Reference bit이 0이면 선택
                     if(iter->page_table->reference_bits[i] == 0) {
                         return clock_hand;
                     }
+                    // Reference bit이 1이면 0으로 초기화
                     else if(iter->page_table->reference_bits[i] == 1) {
                         iter->page_table->reference_bits[i] = 0;
                     }
