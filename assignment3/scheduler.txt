@@ -134,7 +134,7 @@ SleepList: Empty
 IOWait List: Empty
 
 [9 Cycle] Scheduled Process: None
-Running Process: Process#1(2) running code program2 line 3(op 0, arg 12)
+Running Process: Process#1(2) running code program2 line 3(op 0, arg 7)
 RunQueue 0: Empty
 RunQueue 1: Empty
 RunQueue 2: Empty
