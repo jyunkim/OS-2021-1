@@ -1,31 +1,6 @@
-30 512 512 32
-2 proc0 1
-2 proc1 3
-2 proc2 2
-2 proc3 3
-4 proc4 8
-4 proc5 5
-6 proc6 4
-8 proc7 2
-9 proc8 8
-10 proc9 7
-11 proc10 5
-13 proc11 4
-13 proc12 8
-14 proc13 2
-15 proc14 6
-17 proc15 9
-18 proc16 5
-20 proc17 9
-20 proc18 3
-20 proc19 5
-20 proc20 5
-21 proc21 8
-23 proc22 8
-25 proc23 5
-26 proc24 9
-27 proc25 7
-27 proc26 5
-27 proc27 1
-30 proc28 5
-30 proc29 5
+5 1024 512 32
+2 program1 3
+2 program2 1
+4 program3 3
+9 program4 8
+15 program5 2
