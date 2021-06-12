@@ -12,7 +12,7 @@ using namespace std;
 
 int aid = 0;  // allocation id
 int page_fault = 0;  // page fault 발생 수
-int clock_hand = 0;  // allocation id를 가리키는 clock
+int clock_hand = -1;  // allocation id를 가리키는 clock
 
 // Page Table
 class PageTable {
@@ -497,8 +497,15 @@ int sampledLru(list<Process> *processes, int physical_memory[], int page_num, in
 }
 
 
+// Clock algorithm
 int clockLru(list<Process> *processes, int page_num, int my_aid) {
     list<Process>::iterator iter;
+
+    // 이전 victim aid 다음 aid부터 시작
+    clock_hand++;
+    if(clock_hand >= aid) {
+        clock_hand = 0;
+    }
 
     while(true) {
         for(iter = processes->begin(); iter != processes->end(); iter++) {
@@ -514,7 +521,7 @@ int clockLru(list<Process> *processes, int page_num, int my_aid) {
             }
         }
         clock_hand++;
-        if(clock_hand > aid) {
+        if(clock_hand >= aid) {
             clock_hand = 0;
         }
     }
@@ -666,11 +673,13 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
                 }
             }
 
-            // Page table 수정
-            for(int i = 0; i < page_num; i++) {
-                if(cpu[0].page_table->allocation_ids[i] == victim_aid) {
-                    cpu[0].page_table->valid_bits[i] = 0;
-                    cpu[0].page_table->reference_bits[i] = 0;
+            // Victim aid를 가진 프로세스의 page table 수정
+            for(iter = processes->begin(); iter != processes->end(); iter++) {
+                for(int i = 0; i < page_num; i++) {
+                    if(iter->page_table->allocation_ids[i] == victim_aid) {
+                        iter->page_table->valid_bits[i] = 0;
+                        iter->page_table->reference_bits[i] = 0;
+                    }
                 }
             }
 
