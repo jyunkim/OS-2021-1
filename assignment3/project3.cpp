@@ -12,6 +12,7 @@ using namespace std;
 
 int aid = 0;  // allocation id
 int page_fault = 0;  // page fault 발생 수
+list<int> lru_stack;  // lru stack
 int clock_hand = -1;  // allocation id를 가리키는 clock
 
 // Page Table
@@ -22,7 +23,6 @@ public:
     int *allocation_ids;
     int *reference_bits;
     vector<pair<int, deque<int>>> reference_bytes;
-    list<int> lru_stack;
 
     PageTable() {}
     
@@ -536,7 +536,6 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
     int my_aid = aid;
     bool update_aid = true;
     bool is_page_fault = true;
-    list<int> *stk = &(cpu[0].page_table->lru_stack);
 
     // Reference bit 업데이트
     for(int i = 0; i < page_num; i++) {
@@ -620,8 +619,8 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
             int victim_aid;
             // lru 스택 앞에서 victim 가져옴
             if(algorithm == "lru") {
-                victim_aid = stk->front();
-                stk->pop_front();
+                victim_aid = lru_stack.front();
+                lru_stack.pop_front();
             }
             else if(algorithm == "sampled") {
                 victim_aid = sampledLru(processes, physical_memory, page_num, frame_num);
@@ -712,14 +711,8 @@ void memoryAccess(Process cpu[], list<Process> *processes, int physical_memory[]
 
     // lru 스택 업데이트
     // Access된 page의 aid를 스택 뒤에 삽입
-    list<int>::iterator iter3;
-    for(iter3 = stk->begin(); iter3 != stk->end(); iter3++) {
-        if(*iter3 == my_aid) {
-            stk->erase(iter3);
-            break;
-        }
-    }
-    stk->push_back(my_aid);
+    lru_stack.remove(my_aid);
+    lru_stack.push_back(my_aid);
 }
 
 
@@ -728,7 +721,6 @@ void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[
     int my_aid;
     int count = 0;
     list<Process>::iterator iter;
-    list<int> *stk = &(cpu[0].page_table->lru_stack);
 
     // Virtual memory에서 해제
     for(int i = 0; i < page_num; i++) {
@@ -788,13 +780,7 @@ void memoryRelease(Process cpu[], list<Process> *processes, int physical_memory[
     }
 
     // lru stack에서 제거
-    list<int>::iterator iter3;
-    for(iter3 = stk->begin(); iter3 != stk->end(); iter3++) {
-        if(*iter3 == my_aid) {
-            stk->erase(iter3);
-            break;
-        }
-    }
+    lru_stack.remove(my_aid);
 
     // reference byte 제거
     vector<pair<int, deque<int>>>::iterator iter4;
@@ -1176,6 +1162,9 @@ void updateState(Process cpu[], list<Process> *processes, int physical_memory[],
                                 target_frame = target_frame->parent;
                             }
                         }
+                        
+                        // lru stack에서 제거
+                        lru_stack.remove(my_aid);
                     }
                 }
             }
