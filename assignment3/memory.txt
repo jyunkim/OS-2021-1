@@ -329,28 +329,39 @@
 >> pid(2) Page Table(Valid): |1111|111-|----|----|----|----|----|----|
 >> pid(2) Page Table(Ref):   |----|----|----|----|----|----|----|----|
 
-[29 Cycle] Input: Pid[0] Function[ACCESS] Page ID[2] Page Num[1]
+[29 Cycle] Input: Pid[2] Function[NON-MEMORY]
+>> Physical Memory:          |0068|1111|77--|9999|
+>> pid(0) Page Table(PID):   |0011|12--|----|----|----|----|----|----|
+>> pid(0) Page Table(AID):   |0011|1---|----|----|----|----|----|----|
+>> pid(0) Page Table(Valid): |1111|10--|----|----|----|----|----|----|
+>> pid(0) Page Table(Ref):   |----|----|----|----|----|----|----|----|
+>> pid(2) Page Table(PID):   |0112|333-|----|----|----|----|----|----|
+>> pid(2) Page Table(AID):   |6778|999-|----|----|----|----|----|----|
+>> pid(2) Page Table(Valid): |1111|111-|----|----|----|----|----|----|
+>> pid(2) Page Table(Ref):   |----|----|----|----|----|----|----|----|
+
+[30 Cycle] Input: Pid[0] Function[ACCESS] Page ID[2] Page Num[1]
 >> Physical Memory:          |0010-|1111|----|----|
 >> pid(0) Page Table(PID):   |0011|12--|----|----|----|----|----|----|
 >> pid(0) Page Table(AID):   |0011|110--|----|----|----|----|----|----|
 >> pid(0) Page Table(Valid): |1111|11--|----|----|----|----|----|----|
 >> pid(0) Page Table(Ref):   |----|----|----|----|----|----|----|----|
 
-[30 Cycle] Input: Pid[0] Function[SLEEP]
+[31 Cycle] Input: Pid[0] Function[SLEEP]
 >> Physical Memory:          |0010-|1111|----|----|
 >> pid(0) Page Table(PID):   |0011|12--|----|----|----|----|----|----|
 >> pid(0) Page Table(AID):   |0011|110--|----|----|----|----|----|----|
 >> pid(0) Page Table(Valid): |1111|11--|----|----|----|----|----|----|
 >> pid(0) Page Table(Ref):   |----|----|----|----|----|----|----|----|
 
-[31 Cycle] Input: Function[NO-OP]
+[32 Cycle] Input: Function[NO-OP]
 >> Physical Memory:          |0010-|1111|----|----|
 >> pid(0) Page Table(PID):   |0011|12--|----|----|----|----|----|----|
 >> pid(0) Page Table(AID):   |0011|110--|----|----|----|----|----|----|
 >> pid(0) Page Table(Valid): |1111|11--|----|----|----|----|----|----|
 >> pid(0) Page Table(Ref):   |----|----|----|----|----|----|----|----|
 
-[32 Cycle] Input: Pid[0] Function[RELEASE] Page ID[1] Page Num[3]
+[33 Cycle] Input: Pid[0] Function[RELEASE] Page ID[1] Page Num[3]
 >> Physical Memory:          |0010-|----|----|----|
 >> pid(0) Page Table(PID):   |00--|-2--|----|----|----|----|----|----|
 >> pid(0) Page Table(AID):   |00--|-10--|----|----|----|----|----|----|
