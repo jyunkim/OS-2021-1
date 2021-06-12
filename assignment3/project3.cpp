@@ -113,9 +113,9 @@ public:
 // 분할된 frame
 class Node {
 public:
-    Node *left;
-    Node *right;
-    Node *parent;
+    Node *left = nullptr;
+    Node *right = nullptr;
+    Node *parent = nullptr;
     int start;
     int end;
     int size;
