@@ -1,6 +1,6 @@
 # OS-2021-1
 
-- **과제
+- **과제**
 
     Assignment 1: 리눅스 배포판 설치 및 커널 컴파일
 
@@ -13,7 +13,7 @@
     `CPU Scheduling` `Memory Management` `Buddy System` `Paging` `Virtual Memory`
 
 
-- **개념
+- **개념**
 
     ## 1. What is operating system?
 
