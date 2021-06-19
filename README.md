@@ -1,19 +1,20 @@
 # OS-2021-1
 
-## 과제
+- **과제**
 
     - Assignment 1: 리눅스 배포판 설치 및 커널 컴파일
 
     - Assignment 2: 리눅스 쉘 구현, 멀티 프로세싱/멀티 스레딩을 이용한 병합 정렬 구현
 
-    `Shell` `Multi Processing` `Multi Threading` `Merge Sort`
+        `Shell` `Multi Processing` `Multi Threading` `Merge Sort`
 
     - Assignment 3: 스케줄러와 메모리 관리 기법이 결합된 시뮬레이터 구현
 
-    `CPU Scheduling` `Memory Management` `Buddy System` `Paging` `Virtual Memory`
+        `CPU Scheduling` `Memory Management` `Buddy System` `Paging` `Virtual Memory`
 
+---
 
-## 개념
+- **개념**
 
     ## 1. What is operating system?
 
