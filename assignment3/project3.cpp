@@ -1301,9 +1301,9 @@ int main(int argc, char *argv[]) {
     fprintf(fout2, "page fault = %d\n", page_fault);
 
     // open한 파일 close
-	fin.close();
+    fin.close();
     fclose(fout1);
     fclose(fout2);
 
-	return 0;
+    return 0;
 }
